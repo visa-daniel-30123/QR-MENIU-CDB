@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Meniul terasei Casuta dintre brazi — preparate calde, dulciuri și băuturi.">
+  <title>Casuta dintre brazi — Meniu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="LOGO CDB.jpg" type="image/jpeg">
+</head>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <img src="LOGO CDB.jpg" alt="Casuta dintre brazi" class="header__logo" width="120" height="120">
+      <div class="header__text">
+        <h1 class="header__title">Casuta dintre brazi</h1>
+        <p class="header__subtitle">Terasă &amp; meniu</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="Categorii meniu">
+    <button class="nav__btn nav__btn--active" data-category="all">Toate</button>
+    <button class="nav__btn" data-category="mancare">Mâncare</button>
+    <button class="nav__btn" data-category="dulciuri">Dulciuri</button>
+    <button class="nav__btn" data-category="bauturi">Băuturi</button>
+  </nav>
+
+  <main class="main">
+    <section class="category" data-category="mancare">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">🍽️</span>
+        <h2 class="category__title">Preparate calde</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <img src="hot dog.jpg" alt="Hot Dog" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Hot Dog</span>
+              <span class="menu-item__detail">100 gr</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="aripioare.webp" alt="Meniu Aripioare" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Meniu Aripioare</span>
+              <span class="menu-item__detail">Aripioare / cartofi / sos — 200 gr / 175 gr / 25 gr</span>
+            </div>
+            <span class="menu-item__price">27 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="crispy.jpg" alt="Meniu Crispy" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Meniu Crispy</span>
+              <span class="menu-item__detail">Crispy / cartofi / sos — 200 gr / 175 gr / 25 gr</span>
+            </div>
+            <span class="menu-item__price">27 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="cascaval pane.jpg" alt="Meniu Cașcaval Pane" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Meniu Cașcaval Pane</span>
+              <span class="menu-item__detail">Cașcaval pane / cartofi / sos — 200 gr / 175 gr / 25 gr</span>
+            </div>
+            <span class="menu-item__price">27 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="cartofi prajiti.jpg" alt="Cartofi prăjiți" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Cartofi prăjiți</span>
+              <span class="menu-item__detail">200 gr</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="category" data-category="mancare">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">🔥</span>
+        <h2 class="category__title">Preparate la grătar</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <img src="mici.webp" alt="Mici" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Mici</span>
+              <span class="menu-item__detail">70 gr</span>
+            </div>
+            <span class="menu-item__price">5 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="ceafa.webp" alt="Ceafă" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Ceafă</span>
+              <span class="menu-item__detail">200 gr</span>
+            </div>
+            <span class="menu-item__price">20 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="carnaciori.jpg" alt="Cârnăciori" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Cârnăciori</span>
+              <span class="menu-item__detail">50 gr</span>
+            </div>
+            <span class="menu-item__price">5 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Chiflă / pâine</span>
+              <span class="menu-item__detail">50 gr</span>
+            </div>
+            <span class="menu-item__price">1 leu</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="category" data-category="dulciuri">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">🍰</span>
+        <h2 class="category__title">Dulciuri</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <img src="kurtos kalacs.jpg" alt="Kürtős Kalács" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Kürtős Kalács</span>
+              <span class="menu-item__detail">400 gr</span>
+            </div>
+            <span class="menu-item__price">15 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Kürtős cu înghețată</span>
+              <span class="menu-item__detail">250 gr</span>
+            </div>
+            <span class="menu-item__price">20 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Înghețată</span>
+              <span class="menu-item__detail">50 gr</span>
+            </div>
+            <span class="menu-item__price">5 lei</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="category" data-category="bauturi">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">☕</span>
+        <h2 class="category__title">Băuturi calde</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <img src="cafea.jpg" alt="Cafea Julius Meinl" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Cafea Julius Meinl</span>
+              <span class="menu-item__detail">100 ml</span>
+            </div>
+            <span class="menu-item__price">7 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Ceai</span>
+              <span class="menu-item__detail">300 ml</span>
+            </div>
+            <span class="menu-item__price">4 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Ciocolată caldă</span>
+              <span class="menu-item__detail">200 ml</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Vin fiert</span>
+              <span class="menu-item__detail">200 ml</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="category" data-category="bauturi">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">🥤</span>
+        <h2 class="category__title">Sucuri</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <img src="cola.webp" alt="Coca Cola" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Coca Cola</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="cola 0.webp" alt="Coca Zero" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Coca Zero</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="FANTA.webp" alt="Fanta Orange" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Fanta Orange</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="sprite.webp" alt="Sprite" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Sprite</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="fuzetea.png" alt="Fuze Tea" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Fuze Tea</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Limonadă</span>
+              <span class="menu-item__detail">0,35 L</span>
+            </div>
+            <span class="menu-item__price">5 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="SCHWEPPES.webp" alt="Schweppes" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Schweppes</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">6 lei</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="category" data-category="bauturi">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">⚡</span>
+        <h2 class="category__title">Energizante</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Monster</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">10 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Red Bull</span>
+              <span class="menu-item__detail">0,25 L</span>
+            </div>
+            <span class="menu-item__price">10 lei</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="category" data-category="bauturi">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">💧</span>
+        <h2 class="category__title">Apă</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <img src="apa plata 0.5.webp" alt="Apă plată" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Apă plată</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">5 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="apa minerala 0.5.webp" alt="Apă minerală" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Apă minerală</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">5 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Apă Tușnad</span>
+              <span class="menu-item__detail">2 L</span>
+            </div>
+            <span class="menu-item__price">12 lei</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="category" data-category="bauturi">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">🍺</span>
+        <h2 class="category__title">Bere</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <img src="bergembier 0.33.jpg" alt="Bergenbier 0,33 L" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Bergenbier</span>
+              <span class="menu-item__detail">0,33 L</span>
+            </div>
+            <span class="menu-item__price">7 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="bergembier 0.5.webp" alt="Bergenbier 0,5 L" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Bergenbier</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">7 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="becks 0.33.jpg" alt="Beck's 0,33 L" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Beck's</span>
+              <span class="menu-item__detail">0,33 L</span>
+            </div>
+            <span class="menu-item__price">8 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="becks 0.5.jpg" alt="Beck's 0,5 L" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Beck's</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">8 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <img src="stella 0.33.jpg" alt="Stella" class="menu-item__img" width="72" height="72" loading="lazy">
+          <div class="menu-item__content">
+              <span class="menu-item__detail">0,33 L</span>
+            </div>
+            <span class="menu-item__price">9 lei</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="category" data-category="bauturi">
+      <div class="category__header">
+        <span class="category__icon" aria-hidden="true">🍻</span>
+        <h2 class="category__title">Bere fără alcool</h2>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Stella NA</span>
+              <span class="menu-item__detail">0,33 L</span>
+            </div>
+            <span class="menu-item__price">9 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Bergenbier Fresh Lămâie</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">7 lei</span>
+          </div>
+        </li>
+        <li class="menu-item">
+          <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Bergenbier Grapefruit NA</span>
+              <span class="menu-item__detail">0,5 L</span>
+            </div>
+            <span class="menu-item__price">7 lei</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <img src="LOGO CDB.jpg" alt="" class="footer__logo" width="48" height="48" aria-hidden="true">
+    <p class="footer__text">Casuta dintre brazi</p>
+    <p class="footer__note">Prețurile sunt exprimate în lei (RON)</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
