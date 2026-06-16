@@ -104,7 +104,17 @@ function openCheckout() {
 
   els.checkoutBackdrop.hidden = false;
   els.success.hidden = true;
-  els.error.hidden = true;
+
+  if (!isFirebaseConfigured()) {
+    els.error.textContent =
+      "Comenzile online nu sunt disponibile momentan. Contactează ospătarul.";
+    els.error.hidden = false;
+    els.submit.disabled = true;
+  } else {
+    els.error.hidden = true;
+    els.submit.disabled = false;
+  }
+
   els.checkoutModal.showModal();
 }
 
@@ -161,7 +171,7 @@ function renderCart() {
 
   if (!isFirebaseConfigured()) {
     els.error.textContent =
-      "Comenzile online nu sunt activate. Completează Firebase în config.js.";
+      "Comenzile online nu sunt disponibile momentan. Contactează ospătarul.";
     els.error.hidden = false;
     els.submit.disabled = true;
   } else {
