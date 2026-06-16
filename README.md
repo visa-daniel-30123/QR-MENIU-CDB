@@ -2,7 +2,46 @@
 
 Site static cu meniul terasei **Casuta dintre brazi**, coș de comandă pentru clienți și panou admin pentru comenzi live.
 
-## Cum îl deschizi
+## Publicare pe GitHub Pages
+
+Site-ul tău va fi la:
+
+**https://visa-daniel-30123.github.io/QR-MENIU-CDB/**
+
+Admin: **https://visa-daniel-30123.github.io/QR-MENIU-CDB/admin.html**
+
+### Pas 1 — Activează GitHub Pages
+
+1. Repo GitHub → **Settings** → **Pages**
+2. La **Build and deployment** → Source: **GitHub Actions**
+
+### Pas 2 — Adaugă secretele (pentru comenzi + admin)
+
+Repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+
+| Secret | Valoare (din `config.js`) |
+|--------|---------------------------|
+| `FIREBASE_API_KEY` | apiKey |
+| `FIREBASE_AUTH_DOMAIN` | authDomain |
+| `FIREBASE_PROJECT_ID` | projectId |
+| `FIREBASE_STORAGE_BUCKET` | storageBucket |
+| `FIREBASE_MESSAGING_SENDER_ID` | messagingSenderId |
+| `FIREBASE_APP_ID` | appId |
+| `ADMIN_PASSWORD` | parola ta admin |
+
+### Pas 3 — Push pe GitHub
+
+```bash
+git add .
+git commit -m "Fix căi GitHub Pages"
+git push
+```
+
+La fiecare push, GitHub Actions generează `config.js` și publică site-ul (inclusiv imagini).
+
+**Important:** `config.js` nu e în Git (e în `.gitignore`) — se creează automat la deploy din secrete.
+
+## Cum îl deschizi local
 
 Deschide fișierul `index.html` în browser sau rulează un server local:
 

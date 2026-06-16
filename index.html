@@ -29,6 +29,22 @@
     <button class="nav__btn" data-category="bauturi">Băuturi</button>
   </nav>
 
+  <aside class="cart-top" id="cart-top" aria-label="Coșul tău">
+    <div class="cart-top__row">
+      <button type="button" class="cart-top__toggle" id="cart-toggle" aria-expanded="false">
+        <span class="cart-top__label">🛒 Coș</span>
+        <span class="cart-top__summary" id="cart-summary">0 produse · 0 lei</span>
+        <span class="cart-top__chevron" aria-hidden="true">▼</span>
+      </button>
+      <button type="button" class="cart-top__checkout" id="cart-checkout-open" disabled>
+        Finalizează
+      </button>
+    </div>
+    <div class="cart-top__body" id="cart-top-body" hidden>
+      <div class="cart-top__list" id="cart-list"></div>
+    </div>
+  </aside>
+
   <main class="main">
     <section class="category" data-category="mancare">
       <div class="category__header">
@@ -466,6 +482,7 @@
         </li>
       </ul>
     </section>
+
   </main>
 
   <footer class="footer">
@@ -492,48 +509,36 @@
     </footer>
   </dialog>
 
-  <button type="button" class="cart-fab" id="cart-fab" hidden aria-label="Deschide coșul">
-    <span class="cart-fab__icon" aria-hidden="true">🛒</span>
-    <span class="cart-fab__badge" id="cart-badge">0</span>
-  </button>
+  <div class="checkout-backdrop" id="checkout-backdrop" hidden></div>
 
-  <div class="cart-backdrop" id="cart-backdrop" hidden></div>
-
-  <aside class="cart-panel" id="cart-panel" hidden aria-label="Coș comandă">
-    <header class="cart-panel__header">
-      <h2 class="cart-panel__title">Comanda ta</h2>
-      <button type="button" class="cart-panel__close" id="cart-close" aria-label="Închide coșul">×</button>
+  <dialog class="checkout-modal" id="checkout-modal" aria-labelledby="checkout-title">
+    <header class="checkout-modal__header">
+      <h2 class="checkout-modal__title" id="checkout-title">Finalizează comanda</h2>
+      <button type="button" class="checkout-modal__close" id="checkout-close" aria-label="Închide">×</button>
     </header>
-
-    <div class="cart-panel__body">
-      <p class="cart-panel__empty" id="cart-empty">Coșul e gol. Apasă + lângă un produs.</p>
-      <div class="cart-panel__list" id="cart-list"></div>
-
-      <p class="cart-panel__success" id="cart-success" hidden>
+    <div class="checkout-modal__body">
+      <p class="checkout-modal__total">Total: <strong id="cart-total">0 lei</strong></p>
+      <p class="checkout-modal__success" id="cart-success" hidden>
         Comanda a fost trimisă! O pregătim imediat.
       </p>
-      <p class="cart-panel__error" id="cart-error" hidden></p>
-
-      <form class="cart-form" id="cart-form" hidden>
+      <p class="checkout-modal__error" id="cart-error" hidden></p>
+      <form class="cart-form" id="cart-form">
         <label class="cart-form__label">
           Nume
           <input type="text" name="name" class="cart-form__input" required autocomplete="name" placeholder="Ex: Maria">
         </label>
         <label class="cart-form__label">
-          Nr. masă (opțional)
+          Nr. masă
           <input type="text" name="table" class="cart-form__input" inputmode="numeric" placeholder="Ex: 5">
         </label>
         <label class="cart-form__label">
           Observații (opțional)
           <textarea name="notes" class="cart-form__input cart-form__textarea" rows="2" placeholder="Ex: fără muștar"></textarea>
         </label>
-        <div class="cart-form__footer">
-          <span class="cart-form__total">Total: <strong id="cart-total">0 lei</strong></span>
-          <button type="submit" class="cart-form__submit" id="cart-submit">Trimite comanda</button>
-        </div>
+        <button type="submit" class="cart-form__submit" id="cart-submit">Trimite comanda</button>
       </form>
     </div>
-  </aside>
+  </dialog>
 
   <script src="script.js"></script>
   <script type="module" src="cart.js"></script>

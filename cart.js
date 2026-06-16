@@ -20,15 +20,17 @@ const SAUCES = ["Ketchup", "Muștar", "Maioneză", "Usturoi"];
 
 const cart = new Map();
 let pendingProduct = null;
+let cartExpanded = false;
 
 const els = {
-  fab: document.getElementById("cart-fab"),
-  badge: document.getElementById("cart-badge"),
-  panel: document.getElementById("cart-panel"),
-  backdrop: document.getElementById("cart-backdrop"),
-  close: document.getElementById("cart-close"),
+  cartTop: document.getElementById("cart-top"),
+  cartToggle: document.getElementById("cart-toggle"),
+  cartSummary: document.getElementById("cart-summary"),
+  cartTopBody: document.getElementById("cart-top-body"),
   list: document.getElementById("cart-list"),
-  empty: document.getElementById("cart-empty"),
+  checkoutOpenBtn: document.getElementById("cart-checkout-open"),
+  checkoutBackdrop: document.getElementById("checkout-backdrop"),
+  checkoutModal: document.getElementById("checkout-modal"),
   total: document.getElementById("cart-total"),
   form: document.getElementById("cart-form"),
   submit: document.getElementById("cart-submit"),
@@ -88,28 +90,56 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;");
 }
 
-function updateBadge() {
-  const count = cartCount();
-  els.badge.textContent = count;
-  els.badge.hidden = count === 0;
-  els.fab.hidden = count === 0;
+function setCartExpanded(open) {
+  cartExpanded = open;
+  els.cartTopBody.hidden = !open;
+  els.cartToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  els.cartTop.classList.toggle("cart-top--open", open);
+}
+
+function openCheckout() {
+  if (cart.size === 0) return;
+  const totalEl = document.getElementById("cart-total");
+  if (totalEl) totalEl.textContent = `${cartTotal()} lei`;
+
+  els.checkoutBackdrop.hidden = false;
+  els.success.hidden = true;
+  els.error.hidden = true;
+  els.checkoutModal.showModal();
+}
+
+function closeCheckout() {
+  els.checkoutBackdrop.hidden = true;
+  els.checkoutModal.close();
+  els.success.hidden = true;
+  els.error.hidden = true;
+  setTimeout(() => closeCartOptionsAndErrors(), 0);
+}
+
+function closeCartOptionsAndErrors() {
+  // placeholder: keep UI stable; cart errors are shown per submit.
 }
 
 function renderCart() {
   const items = [...cart.values()];
+  const count = cartCount();
+  const total = cartTotal();
+  const hasItems = items.length > 0;
+
+  els.cartTop.hidden = false;
+  if (els.checkoutOpenBtn) els.checkoutOpenBtn.disabled = !hasItems;
   els.list.innerHTML = "";
 
-  if (items.length === 0) {
-    els.empty.hidden = false;
-    els.form.hidden = true;
+  if (!hasItems) {
     els.total.textContent = "0 lei";
-    updateBadge();
+    els.cartSummary.textContent = "0 produse · 0 lei";
+    setCartExpanded(false);
     return;
   }
 
-  els.empty.hidden = true;
-  els.form.hidden = false;
-  els.total.textContent = `${cartTotal()} lei`;
+  const label = count === 1 ? "1 produs" : `${count} produse`;
+  els.cartSummary.textContent = `${label} · ${total} lei`;
+  els.total.textContent = `${total} lei`;
 
   items.forEach((item) => {
     const row = document.createElement("div");
@@ -129,11 +159,9 @@ function renderCart() {
     els.list.appendChild(row);
   });
 
-  updateBadge();
-
   if (!isFirebaseConfigured()) {
     els.error.textContent =
-      "Comenzile online nu sunt activate încă. Coșul funcționează, dar trimiterea necesită configurarea Firebase.";
+      "Comenzile online nu sunt activate. Completează Firebase în config.js.";
     els.error.hidden = false;
     els.submit.disabled = true;
   } else {
@@ -150,6 +178,8 @@ function addToCart(product) {
     cart.set(product.id, { ...product, qty: 1 });
   }
   renderCart();
+  els.cartTop.classList.add("cart-top--pulse");
+  setTimeout(() => els.cartTop.classList.remove("cart-top--pulse"), 400);
 }
 
 function changeQty(id, delta) {
@@ -161,19 +191,6 @@ function changeQty(id, delta) {
     cart.delete(id);
   }
   renderCart();
-}
-
-function openCart() {
-  els.panel.hidden = false;
-  els.backdrop.hidden = false;
-  document.body.classList.add("cart-open");
-}
-
-function closeCart() {
-  els.panel.hidden = true;
-  els.backdrop.hidden = true;
-  document.body.classList.remove("cart-open");
-  els.success.hidden = true;
 }
 
 function closeOptionsModal() {
@@ -303,7 +320,6 @@ function confirmOptions() {
   }
 
   closeOptionsModal();
-  openCart();
 }
 
 function initMenuButtons() {
@@ -325,12 +341,12 @@ function initMenuButtons() {
     btn.className = "menu-item__add";
     btn.setAttribute("aria-label", `Adaugă ${name} în coș`);
     btn.textContent = "+";
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation();
       if (productKey && PRODUCT_OPTIONS[productKey]) {
         openOptionsModal(productKey, { id, name, detail, price, productKey });
       } else {
         addToCart({ id, name, detail, price });
-        openCart();
       }
     });
 
@@ -343,7 +359,7 @@ async function submitOrder(event) {
   if (cart.size === 0) return;
 
   if (!isFirebaseConfigured()) {
-    els.error.textContent = "Trimiterea comenzilor necesită configurarea Firebase în config.js.";
+    els.error.textContent = "Trimiterea comenzilor necesită configurarea Firebase.";
     els.error.hidden = false;
     return;
   }
@@ -385,7 +401,11 @@ async function submitOrder(event) {
     renderCart();
     els.form.reset();
     els.success.hidden = false;
-    setTimeout(closeCart, 2500);
+    setCartExpanded(false);
+    setTimeout(() => {
+      els.success.hidden = true;
+      closeCheckout();
+    }, 2300);
   } catch (err) {
     console.error(err);
     els.error.textContent = "Comanda nu a putut fi trimisă. Verifică conexiunea.";
@@ -399,9 +419,17 @@ function init() {
   initMenuButtons();
   renderCart();
 
-  els.fab.addEventListener("click", openCart);
-  els.close.addEventListener("click", closeCart);
-  els.backdrop.addEventListener("click", closeCart);
+  els.cartToggle.addEventListener("click", () => setCartExpanded(!cartExpanded));
+  if (els.checkoutOpenBtn) {
+    els.checkoutOpenBtn.addEventListener("click", () => openCheckout());
+  }
+
+  els.checkoutModal.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeCheckout();
+  });
+  els.checkoutBackdrop?.addEventListener("click", () => closeCheckout());
+  document.getElementById("checkout-close")?.addEventListener("click", () => closeCheckout());
 
   els.optionsConfirm.addEventListener("click", confirmOptions);
   els.optionsCancel.addEventListener("click", closeOptionsModal);
