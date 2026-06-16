@@ -1,0 +1,27 @@
+# Configurare locală (parolă admin + chei Firebase)
+config.js
+
+# Variabile de mediu
+.env
+.env.*
+!.env.example
+
+# Firebase CLI (cache local)
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Dependențe Node (dacă folosești npm)
+node_modules/
+
+# Sistem de operare
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

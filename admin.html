@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin comenzi — Casuta dintre brazi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin.css">
+  <link rel="icon" href="/LOGO%20CDB.jpg" type="image/jpeg">
+</head>
+<body>
+  <p class="setup-error" id="setup-error" hidden></p>
+
+  <section class="admin-login" id="admin-login">
+    <div class="admin-login__card">
+      <img src="/LOGO%20CDB.jpg" alt="" class="admin-login__logo" width="80" height="80">
+      <h1 class="admin-login__title">Panou comenzi</h1>
+      <p class="admin-login__subtitle">Casuta dintre brazi</p>
+      <form class="admin-login__form" id="login-form" onsubmit="return false;">
+        <label class="admin-login__label">
+          Parolă admin
+          <input type="password" name="password" id="login-password" class="admin-login__input" autocomplete="current-password">
+        </label>
+        <p class="admin-login__error" id="login-error" hidden></p>
+        <p class="admin-login__hint">Parola e setată în <code>config.js</code> (fișier local, nu pe Git).</p>
+        <button type="button" class="admin-login__btn" id="login-btn">Intră</button>
+      </form>
+      <a href="/" class="admin-login__back">← Înapoi la meniu</a>
+    </div>
+  </section>
+
+  <div class="admin-dashboard admin-view--hidden" id="admin-dashboard">
+    <header class="admin-header">
+      <div class="admin-header__brand">
+        <img src="/LOGO%20CDB.jpg" alt="" width="44" height="44" class="admin-header__logo">
+        <div>
+          <h1 class="admin-header__title">Comenzi live</h1>
+          <p class="admin-header__subtitle">Actualizare automată</p>
+        </div>
+      </div>
+      <button type="button" class="admin-header__logout" id="admin-logout">Ieșire</button>
+    </header>
+
+    <section class="admin-stats" aria-label="Statistici comenzi">
+      <div class="admin-stat">
+        <span class="admin-stat__value" id="stat-new">0</span>
+        <span class="admin-stat__label">Noi</span>
+      </div>
+      <div class="admin-stat admin-stat--highlight">
+        <span class="admin-stat__value" id="stat-active">0</span>
+        <span class="admin-stat__label">Active</span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__value" id="stat-done">0</span>
+        <span class="admin-stat__label">Finalizate</span>
+      </div>
+    </section>
+
+    <nav class="admin-filters" aria-label="Filtru comenzi">
+      <button type="button" class="admin-filter admin-filter--active" data-filter="active">Active</button>
+      <button type="button" class="admin-filter" data-filter="new">Noi</button>
+      <button type="button" class="admin-filter" data-filter="preparing">În lucru</button>
+      <button type="button" class="admin-filter" data-filter="done">Gata</button>
+      <button type="button" class="admin-filter" data-filter="all">Toate</button>
+    </nav>
+
+    <main class="admin-main">
+      <p class="admin-empty" id="orders-empty" hidden>Nicio comandă în această categorie.</p>
+      <div class="orders-list" id="orders-list"></div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var SESSION_KEY = "cdb-admin-auth";
+      var PASSWORD = "";
+
+      var loginSection = document.getElementById("admin-login");
+      var dashboard = document.getElementById("admin-dashboard");
+      var loginBtn = document.getElementById("login-btn");
+      var loginError = document.getElementById("login-error");
+      var setupError = document.getElementById("setup-error");
+      var passwordInput = document.getElementById("login-password");
+
+      if (location.protocol === "file:") {
+        setupError.hidden = false;
+        setupError.textContent =
+          'Deschide cu server: cd "c:\\QR MENIU\\QR MENIU CDB" apoi npx serve .';
+        return;
+      }
+
+      function showError(msg) {
+        setupError.textContent = msg;
+        setupError.hidden = false;
+      }
+
+      function showLoginError(msg) {
+        loginError.textContent = msg;
+        loginError.hidden = false;
+      }
+
+      function showDashboard() {
+        loginSection.classList.add("admin-view--hidden");
+        dashboard.classList.remove("admin-view--hidden");
+        window.scrollTo(0, 0);
+      }
+
+      function showLogin() {
+        loginSection.classList.remove("admin-view--hidden");
+        dashboard.classList.add("admin-view--hidden");
+      }
+
+      function loadOrdersPanel() {
+        import("/admin-panel.js")
+          .then(function (mod) {
+            mod.startAdminPanel(function () {
+              sessionStorage.removeItem(SESSION_KEY);
+              showLogin();
+            });
+          })
+          .catch(function (err) {
+            console.error(err);
+            showError("Ești logat, dar comenzile nu se încarcă. Verifică Firebase și internetul.");
+          });
+      }
+
+      function handleLogin() {
+        if (!PASSWORD) {
+          showLoginError("Lipsește config.js. Copiază config.example.js în config.js.");
+          return;
+        }
+
+        var password = (passwordInput.value || "").trim();
+
+        if (!password) {
+          showLoginError("Introdu parola.");
+          return;
+        }
+
+        if (password !== PASSWORD) {
+          showLoginError("Parolă incorectă.");
+          return;
+        }
+
+        sessionStorage.setItem(SESSION_KEY, "1");
+        loginError.hidden = true;
+        loginBtn.textContent = "OK!";
+        showDashboard();
+        loadOrdersPanel();
+      }
+
+      function bindLogin() {
+        loginBtn.addEventListener("click", handleLogin);
+
+        passwordInput.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleLogin();
+          }
+        });
+
+        document.getElementById("admin-logout").addEventListener("click", function () {
+          sessionStorage.removeItem(SESSION_KEY);
+          showLogin();
+          loginBtn.textContent = "Intră";
+        });
+
+        if (sessionStorage.getItem(SESSION_KEY) === "1") {
+          showDashboard();
+          loadOrdersPanel();
+        }
+      }
+
+      fetch("/config.js")
+        .then(function (response) {
+          if (!response.ok) throw new Error("config.js lipsește");
+          return response.text();
+        })
+        .then(function (text) {
+          var match = text.match(/ADMIN_PASSWORD\s*=\s*["']([^"']+)["']/);
+          if (!match) throw new Error("ADMIN_PASSWORD nu e setat în config.js");
+          PASSWORD = match[1];
+          bindLogin();
+        })
+        .catch(function () {
+          showError("Creează config.js din config.example.js și completează datele Firebase + parola admin.");
+          bindLogin();
+        });
+    })();
+  </script>
+</body>
+</html>

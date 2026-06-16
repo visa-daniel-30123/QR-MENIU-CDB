@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Meniul terasei Casuta dintre brazi — preparate calde, dulciuri și băuturi.">
   <title>Casuta dintre brazi — Meniu</title>
+  <base href="/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -46,7 +47,7 @@
             <span class="menu-item__price">6 lei</span>
           </div>
         </li>
-        <li class="menu-item">
+        <li class="menu-item" data-product="meniu-aripioare">
           <img src="aripioare.webp" alt="Meniu Aripioare" class="menu-item__img" width="72" height="72" loading="lazy">
           <div class="menu-item__content">
             <div class="menu-item__info">
@@ -56,7 +57,7 @@
             <span class="menu-item__price">27 lei</span>
           </div>
         </li>
-        <li class="menu-item">
+        <li class="menu-item" data-product="meniu-crispy">
           <img src="crispy.jpg" alt="Meniu Crispy" class="menu-item__img" width="72" height="72" loading="lazy">
           <div class="menu-item__content">
             <div class="menu-item__info">
@@ -66,7 +67,7 @@
             <span class="menu-item__price">27 lei</span>
           </div>
         </li>
-        <li class="menu-item">
+        <li class="menu-item" data-product="meniu-cascaval">
           <img src="cascaval pane.jpg" alt="Meniu Cașcaval Pane" class="menu-item__img" width="72" height="72" loading="lazy">
           <div class="menu-item__content">
             <div class="menu-item__info">
@@ -95,7 +96,7 @@
         <h2 class="category__title">Preparate la grătar</h2>
       </div>
       <ul class="menu-list">
-        <li class="menu-item">
+        <li class="menu-item" data-product="mici">
           <img src="mici.webp" alt="Mici" class="menu-item__img" width="72" height="72" loading="lazy">
           <div class="menu-item__content">
             <div class="menu-item__info">
@@ -105,7 +106,7 @@
             <span class="menu-item__price">5 lei</span>
           </div>
         </li>
-        <li class="menu-item">
+        <li class="menu-item" data-product="ceafa">
           <img src="ceafa.webp" alt="Ceafă" class="menu-item__img" width="72" height="72" loading="lazy">
           <div class="menu-item__content">
             <div class="menu-item__info">
@@ -115,7 +116,7 @@
             <span class="menu-item__price">20 lei</span>
           </div>
         </li>
-        <li class="menu-item">
+        <li class="menu-item" data-product="carnaciori">
           <img src="carnaciori.jpg" alt="Cârnăciori" class="menu-item__img" width="72" height="72" loading="lazy">
           <div class="menu-item__content">
             <div class="menu-item__info">
@@ -419,6 +420,8 @@
         <li class="menu-item">
           <img src="stella 0.33.jpg" alt="Stella" class="menu-item__img" width="72" height="72" loading="lazy">
           <div class="menu-item__content">
+            <div class="menu-item__info">
+              <span class="menu-item__name">Stella</span>
               <span class="menu-item__detail">0,33 L</span>
             </div>
             <span class="menu-item__price">9 lei</span>
@@ -472,6 +475,68 @@
     <p class="footer__note">Prețurile sunt exprimate în lei (RON)</p>
   </footer>
 
-  <script src="script.js"></script>
+  <div class="options-backdrop" id="options-backdrop" hidden></div>
+
+  <dialog class="options-modal" id="options-modal" aria-labelledby="options-title">
+    <header class="options-modal__header">
+      <h2 class="options-modal__title" id="options-title">Personalizează</h2>
+      <button type="button" class="options-modal__close" id="options-close" aria-label="Închide">×</button>
+    </header>
+    <div class="options-modal__body" id="options-body"></div>
+    <p class="options-modal__error" id="options-error" hidden></p>
+    <footer class="options-modal__footer">
+      <span class="options-modal__price" id="options-price"></span>
+      <div class="options-modal__actions">
+        <button type="button" class="options-modal__btn options-modal__btn--ghost" id="options-cancel">Anulează</button>
+        <button type="button" class="options-modal__btn options-modal__btn--primary" id="options-confirm">Adaugă în coș</button>
+      </div>
+    </footer>
+  </dialog>
+
+  <button type="button" class="cart-fab" id="cart-fab" hidden aria-label="Deschide coșul">
+    <span class="cart-fab__icon" aria-hidden="true">🛒</span>
+    <span class="cart-fab__badge" id="cart-badge">0</span>
+  </button>
+
+  <div class="cart-backdrop" id="cart-backdrop" hidden></div>
+
+  <aside class="cart-panel" id="cart-panel" hidden aria-label="Coș comandă">
+    <header class="cart-panel__header">
+      <h2 class="cart-panel__title">Comanda ta</h2>
+      <button type="button" class="cart-panel__close" id="cart-close" aria-label="Închide coșul">×</button>
+    </header>
+
+    <div class="cart-panel__body">
+      <p class="cart-panel__empty" id="cart-empty">Coșul e gol. Apasă + lângă un produs.</p>
+      <div class="cart-panel__list" id="cart-list"></div>
+
+      <p class="cart-panel__success" id="cart-success" hidden>
+        Comanda a fost trimisă! O pregătim imediat.
+      </p>
+      <p class="cart-panel__error" id="cart-error" hidden></p>
+
+      <form class="cart-form" id="cart-form" hidden>
+        <label class="cart-form__label">
+          Nume
+          <input type="text" name="name" class="cart-form__input" required autocomplete="name" placeholder="Ex: Maria">
+        </label>
+        <label class="cart-form__label">
+          Nr. masă (opțional)
+          <input type="text" name="table" class="cart-form__input" inputmode="numeric" placeholder="Ex: 5">
+        </label>
+        <label class="cart-form__label">
+          Observații (opțional)
+          <textarea name="notes" class="cart-form__input cart-form__textarea" rows="2" placeholder="Ex: fără muștar"></textarea>
+        </label>
+        <div class="cart-form__footer">
+          <span class="cart-form__total">Total: <strong id="cart-total">0 lei</strong></span>
+          <button type="submit" class="cart-form__submit" id="cart-submit">Trimite comanda</button>
+        </div>
+      </form>
+    </div>
+  </aside>
+
+  <script src="/script.js"></script>
+  <script type="module" src="/cart.js"></script>
 </body>
 </html>
