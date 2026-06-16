@@ -3,7 +3,7 @@ import {
   addDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { db, isFirebaseConfigured } from "/firebase-app.js";
+import { db, isFirebaseConfigured } from "./firebase-app.js";
 
 const FRIES_PRICE = 6;
 

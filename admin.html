@@ -8,15 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin.css">
-  <link rel="icon" href="/LOGO%20CDB.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="admin.css">
+  <link rel="icon" href="LOGO CDB.jpg" type="image/jpeg">
 </head>
 <body>
   <p class="setup-error" id="setup-error" hidden></p>
 
   <section class="admin-login" id="admin-login">
     <div class="admin-login__card">
-      <img src="/LOGO%20CDB.jpg" alt="" class="admin-login__logo" width="80" height="80">
+      <img src="LOGO CDB.jpg" alt="" class="admin-login__logo" width="80" height="80">
       <h1 class="admin-login__title">Panou comenzi</h1>
       <p class="admin-login__subtitle">Casuta dintre brazi</p>
       <form class="admin-login__form" id="login-form" onsubmit="return false;">
@@ -28,14 +28,14 @@
         <p class="admin-login__hint">Parola e setată în <code>config.js</code> (fișier local, nu pe Git).</p>
         <button type="button" class="admin-login__btn" id="login-btn">Intră</button>
       </form>
-      <a href="/" class="admin-login__back">← Înapoi la meniu</a>
+      <a href="index.html" class="admin-login__back">← Înapoi la meniu</a>
     </div>
   </section>
 
   <div class="admin-dashboard admin-view--hidden" id="admin-dashboard">
     <header class="admin-header">
       <div class="admin-header__brand">
-        <img src="/LOGO%20CDB.jpg" alt="" width="44" height="44" class="admin-header__logo">
+        <img src="LOGO CDB.jpg" alt="" width="44" height="44" class="admin-header__logo">
         <div>
           <h1 class="admin-header__title">Comenzi live</h1>
           <p class="admin-header__subtitle">Actualizare automată</p>
@@ -116,7 +116,7 @@
       }
 
       function loadOrdersPanel() {
-        import("/admin-panel.js")
+        import("./admin-panel.js")
           .then(function (mod) {
             mod.startAdminPanel(function () {
               sessionStorage.removeItem(SESSION_KEY);
@@ -176,7 +176,7 @@
         }
       }
 
-      fetch("/config.js")
+      fetch("config.js")
         .then(function (response) {
           if (!response.ok) throw new Error("config.js lipsește");
           return response.text();
