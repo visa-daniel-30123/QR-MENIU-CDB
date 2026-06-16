@@ -25,7 +25,7 @@
           <input type="password" name="password" id="login-password" class="admin-login__input" autocomplete="current-password">
         </label>
         <p class="admin-login__error" id="login-error" hidden></p>
-        <p class="admin-login__hint">Parola e setată în <code>config.js</code> (fișier local, nu pe Git).</p>
+        <p class="admin-login__hint">Parola e setată în <code>admin-config.js</code>.</p>
         <button type="button" class="admin-login__btn" id="login-btn">Intră</button>
       </form>
       <a href="index.html" class="admin-login__back">← Înapoi la meniu</a>
@@ -129,9 +129,42 @@
           });
       }
 
+      function parseAdminPassword(text) {
+        var match = text.match(/ADMIN_PASSWORD\s*=\s*["']([^"']+)["']/);
+        return match ? match[1] : null;
+      }
+
+      function loadAdminPassword() {
+        return fetch("config.js")
+          .then(function (response) {
+            if (!response.ok) return null;
+            return response.text();
+          })
+          .then(function (text) {
+            if (!text) return null;
+            return parseAdminPassword(text);
+          })
+          .catch(function () {
+            return null;
+          })
+          .then(function (fromConfig) {
+            if (fromConfig) return fromConfig;
+            return fetch("admin-config.js")
+              .then(function (response) {
+                if (!response.ok) throw new Error("admin-config.js lipsește");
+                return response.text();
+              })
+              .then(function (text) {
+                var pwd = parseAdminPassword(text);
+                if (!pwd) throw new Error("ADMIN_PASSWORD gol");
+                return pwd;
+              });
+          });
+      }
+
       function handleLogin() {
         if (!PASSWORD) {
-          showLoginError("Lipsește config.js. Copiază config.example.js în config.js.");
+          showLoginError("Parola admin nu e configurată. Verifică admin-config.js.");
           return;
         }
 
@@ -176,19 +209,13 @@
         }
       }
 
-      fetch("config.js")
-        .then(function (response) {
-          if (!response.ok) throw new Error("config.js lipsește");
-          return response.text();
-        })
-        .then(function (text) {
-          var match = text.match(/ADMIN_PASSWORD\s*=\s*["']([^"']+)["']/);
-          if (!match) throw new Error("ADMIN_PASSWORD nu e setat în config.js");
-          PASSWORD = match[1];
+      loadAdminPassword()
+        .then(function (pwd) {
+          PASSWORD = pwd;
           bindLogin();
         })
         .catch(function () {
-          showError("Creează config.js din config.example.js și completează datele Firebase + parola admin.");
+          showError("Lipsește parola admin. Verifică admin-config.js sau config.js local.");
           bindLogin();
         });
     })();

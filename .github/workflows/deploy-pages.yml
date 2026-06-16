@@ -19,17 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generează config.js (parolă admin) din GitHub Secrets
-        env:
-          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-        run: |
-          if [ -z "$ADMIN_PASSWORD" ]; then
-            echo "::warning::Lipsește ADMIN_PASSWORD — panoul admin nu va funcționa până adaugi secretul."
-          fi
-          cat > config.js << EOF
-          export const ADMIN_PASSWORD = "${ADMIN_PASSWORD}";
-          EOF
-
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
