@@ -520,6 +520,22 @@
     </footer>
   </dialog>
 
+  <div class="drink-upsell-backdrop" id="drink-upsell-backdrop" hidden></div>
+
+  <dialog class="drink-upsell-modal" id="drink-upsell-modal" aria-labelledby="drink-upsell-title">
+    <header class="drink-upsell-modal__header">
+      <h2 class="drink-upsell-modal__title" id="drink-upsell-title">Ceva de băut?</h2>
+      <button type="button" class="drink-upsell-modal__close" id="drink-upsell-close" aria-label="Închide">×</button>
+    </header>
+    <div class="drink-upsell-modal__body">
+      <p class="drink-upsell-modal__hint">Ai comandat mâncare — poate vrei și ceva de băut?</p>
+      <div class="drink-upsell__list" id="drink-upsell-list"></div>
+    </div>
+    <footer class="drink-upsell-modal__footer">
+      <button type="button" class="drink-upsell-modal__btn drink-upsell-modal__btn--primary" id="drink-upsell-continue">Continuă la comandă</button>
+    </footer>
+  </dialog>
+
   <div class="checkout-backdrop" id="checkout-backdrop" hidden></div>
 
   <dialog class="checkout-modal" id="checkout-modal" aria-labelledby="checkout-title">

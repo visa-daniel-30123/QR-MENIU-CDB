@@ -495,6 +495,153 @@ body {
   border: 2px solid var(--red-light);
 }
 
+.drink-upsell-modal {
+  position: fixed;
+  z-index: 115;
+  width: calc(100% - 2rem);
+  max-width: 420px;
+  margin: auto;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  font-family: var(--font);
+}
+
+.drink-upsell-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--red);
+  color: var(--white);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.drink-upsell-modal__title {
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.drink-upsell-modal__close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.drink-upsell-modal__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.drink-upsell-modal__hint {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.drink-upsell__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.drink-upsell__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.drink-upsell__item--unavailable {
+  opacity: 0.55;
+}
+
+.drink-upsell__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.drink-upsell__name {
+  font-weight: 800;
+}
+
+.drink-upsell__detail {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.drink-upsell__add {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font: inherit;
+  font-weight: 800;
+  background: var(--red);
+  color: var(--white);
+  cursor: pointer;
+}
+
+.drink-upsell__add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.drink-upsell__added {
+  flex-shrink: 0;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #1a7f4b;
+}
+
+.drink-upsell-modal__footer {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.drink-upsell-modal__btn {
+  width: 100%;
+  font: inherit;
+  font-weight: 800;
+  padding: 0.8rem;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.drink-upsell-modal__btn--primary {
+  border: none;
+  background: var(--red);
+  color: var(--white);
+}
+
+.drink-upsell-modal__btn--primary:hover {
+  background: var(--red-dark);
+}
+
+.drink-upsell-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 114;
+}
+
 .checkout-backdrop {
   position: fixed;
   inset: 0;

@@ -73,6 +73,11 @@ const els = {
   optionsConfirm: document.getElementById("options-confirm"),
   optionsCancel: document.getElementById("options-cancel"),
   optionsClose: document.getElementById("options-close"),
+  drinkUpsellBackdrop: document.getElementById("drink-upsell-backdrop"),
+  drinkUpsellModal: document.getElementById("drink-upsell-modal"),
+  drinkUpsellList: document.getElementById("drink-upsell-list"),
+  drinkUpsellContinue: document.getElementById("drink-upsell-continue"),
+  drinkUpsellClose: document.getElementById("drink-upsell-close"),
 };
 
 function slugify(text) {
@@ -83,6 +88,17 @@ function slugify(text) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+const DRINK_RECOMMENDATIONS = [
+  { name: "Apă plată", detail: "0,5 L", price: 5 },
+  { name: "Coca Cola", detail: "0,5 L", price: 6 },
+  { name: "Schweppes", detail: "0,5 L", price: 6 },
+].map((drink) => ({
+  ...drink,
+  menuId: getMenuId(null, drink.name, drink.detail),
+  id: slugify(`${drink.name}-${drink.detail}`),
+  menuCategory: "bauturi",
+}));
 
 function parsePrice(text) {
   const match = text.match(/(\d+)/);
@@ -248,6 +264,92 @@ function setCartExpanded(open) {
   els.cartTopBody.hidden = !open;
   els.cartToggle.setAttribute("aria-expanded", open ? "true" : "false");
   els.cartTop.classList.toggle("cart-top--open", open);
+}
+
+function cartHasMenuCategory(category) {
+  for (const item of cart.values()) {
+    if (item.menuCategory === category) return true;
+  }
+  return false;
+}
+
+function shouldOfferDrinks() {
+  return cartHasMenuCategory("mancare") && !cartHasMenuCategory("bauturi");
+}
+
+function requestCheckout() {
+  if (cart.size === 0) return;
+  if (shouldOfferDrinks()) {
+    openDrinkUpsell();
+    return;
+  }
+  openCheckout();
+}
+
+function renderDrinkUpsellList() {
+  if (!els.drinkUpsellList) return;
+
+  els.drinkUpsellList.innerHTML = "";
+  DRINK_RECOMMENDATIONS.forEach((drink) => {
+    const unavailable = unavailableIds.has(drink.menuId);
+    const inCart = [...cart.values()].some(
+      (item) => item.menuId === drink.menuId || item.id === drink.id
+    );
+
+    const row = document.createElement("div");
+    row.className = "drink-upsell__item";
+    if (unavailable) row.classList.add("drink-upsell__item--unavailable");
+
+    const info = document.createElement("div");
+    info.className = "drink-upsell__info";
+    info.innerHTML = `
+      <span class="drink-upsell__name">${escapeHtml(drink.name)}</span>
+      <span class="drink-upsell__detail">${escapeHtml(drink.detail)} · ${drink.price} lei</span>
+    `;
+    row.appendChild(info);
+
+    if (inCart) {
+      const added = document.createElement("span");
+      added.className = "drink-upsell__added";
+      added.textContent = "✓ În coș";
+      row.appendChild(added);
+    } else {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "drink-upsell__add";
+      btn.textContent = "+ Adaugă";
+      btn.disabled = unavailable;
+      btn.addEventListener("click", () => {
+        addToCart({ ...drink });
+        renderDrinkUpsellList();
+      });
+      row.appendChild(btn);
+    }
+
+    els.drinkUpsellList.appendChild(row);
+  });
+}
+
+function openDrinkUpsell() {
+  if (!els.drinkUpsellModal) {
+    openCheckout();
+    return;
+  }
+
+  renderDrinkUpsellList();
+  els.drinkUpsellBackdrop.hidden = false;
+  els.drinkUpsellModal.showModal();
+}
+
+function closeDrinkUpsell() {
+  if (!els.drinkUpsellModal) return;
+  els.drinkUpsellBackdrop.hidden = true;
+  els.drinkUpsellModal.close();
+}
+
+function proceedFromDrinkUpsell() {
+  closeDrinkUpsell();
+  openCheckout();
 }
 
 function openCheckout() {
@@ -652,6 +754,7 @@ function openEditModal(item) {
     name: item.name,
     price: item.price,
     productKey,
+    menuCategory: item.menuCategory,
     editOptions: item.options || parseOptionsFromDetail(item.detail, config),
   };
   els.optionsTitle.textContent = item.name;
@@ -714,6 +817,7 @@ function confirmOptions() {
       productKey: pendingProduct.productKey,
       options,
       customizable: true,
+      menuCategory: pendingProduct.menuCategory,
     });
   } else if (config.type === "sauces") {
     const sauces = [...els.optionsBody.querySelectorAll('input[name="product-sauce"]:checked')].map(
@@ -745,6 +849,7 @@ function confirmOptions() {
       productKey: pendingProduct.productKey,
       options,
       customizable: true,
+      menuCategory: pendingProduct.menuCategory,
     });
   } else if (config.type === "plate") {
     const quantities = getPlateQuantities();
@@ -782,6 +887,7 @@ function confirmOptions() {
       productKey: pendingProduct.productKey,
       options,
       customizable: true,
+      menuCategory: pendingProduct.menuCategory,
     });
   } else {
     const pieces = Math.min(30, Math.max(1, Number(document.getElementById("grill-pieces").value)));
@@ -822,6 +928,7 @@ function confirmOptions() {
       productKey: pendingProduct.productKey,
       options,
       customizable: true,
+      menuCategory: pendingProduct.menuCategory,
     });
   }
 
@@ -842,6 +949,7 @@ function initMenuButtons() {
     const productKey = item.dataset.product || "";
     const menuId = getMenuId(productKey, name, detail);
     const id = slugify(`${name}-${detail}`);
+    const menuCategory = item.closest(".category")?.dataset.category || "";
 
     item.dataset.menuId = menuId;
 
@@ -855,9 +963,9 @@ function initMenuButtons() {
       if (unavailableIds.has(menuId)) return;
 
       if (productKey && PRODUCT_OPTIONS[productKey]) {
-        openOptionsModal(productKey, { id, name, detail, price, productKey, menuId });
+        openOptionsModal(productKey, { id, name, detail, price, productKey, menuId, menuCategory });
       } else {
-        addToCart({ id, name, detail, price, menuId });
+        addToCart({ id, name, detail, price, menuId, menuCategory });
       }
     });
 
@@ -990,8 +1098,16 @@ function init() {
 
   els.cartToggle.addEventListener("click", () => setCartExpanded(!cartExpanded));
   if (els.checkoutOpenBtn) {
-    els.checkoutOpenBtn.addEventListener("click", () => openCheckout());
+    els.checkoutOpenBtn.addEventListener("click", () => requestCheckout());
   }
+
+  els.drinkUpsellContinue?.addEventListener("click", () => proceedFromDrinkUpsell());
+  els.drinkUpsellClose?.addEventListener("click", () => closeDrinkUpsell());
+  els.drinkUpsellBackdrop?.addEventListener("click", () => closeDrinkUpsell());
+  els.drinkUpsellModal?.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeDrinkUpsell();
+  });
 
   els.checkoutModal.addEventListener("cancel", (event) => {
     event.preventDefault();
