@@ -237,6 +237,38 @@ body {
   cursor: not-allowed;
 }
 
+.admin-notify--active {
+  justify-content: center;
+  color: var(--green);
+  border-color: var(--green-light);
+  background: var(--green-light);
+  font-weight: 800;
+}
+
+.admin-toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  max-width: min(360px, calc(100vw - 2rem));
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: var(--red);
+  color: var(--white);
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 12px 30px rgba(200, 16, 46, 0.35);
+  transform: translateY(-12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.admin-toast--show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
 .admin-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

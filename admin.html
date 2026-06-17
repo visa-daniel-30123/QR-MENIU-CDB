@@ -45,9 +45,12 @@
     </header>
 
     <p class="admin-notify" id="admin-notify" hidden>
-      <span>Primește alertă pe telefon când vine o comandă nouă.</span>
+      <span>Primește alertă pe telefon sau laptop când vine o comandă nouă.</span>
       <button type="button" class="admin-notify__btn" id="admin-notify-btn">Activează notificări</button>
     </p>
+    <p class="admin-notify admin-notify--active" id="admin-notify-active" hidden>🔔 Notificări active pe acest dispozitiv</p>
+
+    <div class="admin-toast" id="admin-toast" hidden role="status" aria-live="assertive"></div>
 
     <section class="admin-stats" aria-label="Statistici comenzi">
       <div class="admin-stat">
@@ -127,6 +130,7 @@
               sessionStorage.removeItem(SESSION_KEY);
               showLogin();
             });
+            mod.setupNotificationsOnLogin();
           })
           .catch(function (err) {
             console.error(err);

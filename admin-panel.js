@@ -26,6 +26,8 @@ let orders = [];
 let knownIds = new Set();
 let firstLoad = true;
 let started = false;
+let audioContext = null;
+const PAGE_TITLE = "Admin comenzi — Casuta dintre brazi";
 
 const STATUS_LABELS = {
   new: "Nouă",
@@ -51,17 +53,31 @@ function formatTime(timestamp) {
   });
 }
 
+function unlockAudio() {
+  try {
+    if (!audioContext) audioContext = new AudioContext();
+    if (audioContext.state === "suspended") audioContext.resume();
+  } catch {
+    /* optional */
+  }
+}
+
 function playNewOrderSound() {
   try {
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = 880;
-    gain.gain.value = 0.08;
-    osc.start();
-    osc.stop(ctx.currentTime + 0.15);
+    unlockAudio();
+    const ctx = audioContext || new AudioContext();
+    audioContext = ctx;
+
+    [0, 0.2].forEach((delay) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = delay === 0 ? 880 : 1100;
+      gain.gain.value = 0.12;
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.18);
+    });
   } catch {
     /* optional */
   }
@@ -83,6 +99,8 @@ async function requestNotifications() {
 }
 
 function notifyNewOrder(order) {
+  showNewOrderToast(order);
+
   if (!notificationsEnabled()) return;
 
   const table = order.tableNumber ? ` · Masa ${order.tableNumber}` : "";
@@ -105,27 +123,59 @@ function notifyNewOrder(order) {
   }
 }
 
+function showNewOrderToast(order) {
+  const toast = document.getElementById("admin-toast");
+  if (!toast) return;
+
+  const table = order.tableNumber ? ` · Masa ${order.tableNumber}` : "";
+  toast.textContent = `Comandă nouă: ${order.customerName || "Client"}${table} · ${order.total} lei`;
+  toast.hidden = false;
+  toast.classList.add("admin-toast--show");
+  document.title = `🔔 Comandă nouă! — ${PAGE_TITLE}`;
+
+  window.setTimeout(() => {
+    toast.classList.remove("admin-toast--show");
+    window.setTimeout(() => {
+      toast.hidden = true;
+      if (document.title.startsWith("🔔")) document.title = PAGE_TITLE;
+    }, 300);
+  }, 9000);
+}
+
 function updateNotificationUi() {
   const banner = document.getElementById("admin-notify");
+  const active = document.getElementById("admin-notify-active");
   const button = document.getElementById("admin-notify-btn");
   if (!banner || !button) return;
 
   if (!canUseNotifications()) {
     banner.hidden = true;
+    if (active) active.hidden = true;
     return;
   }
 
   if (Notification.permission === "granted") {
     banner.hidden = true;
+    if (active) active.hidden = false;
     return;
   }
 
+  if (active) active.hidden = true;
   banner.hidden = false;
   button.textContent =
     Notification.permission === "denied"
       ? "Notificări blocate în browser"
       : "Activează notificări";
   button.disabled = Notification.permission === "denied";
+}
+
+export async function setupNotificationsOnLogin() {
+  unlockAudio();
+  if (!canUseNotifications()) return;
+  if (Notification.permission === "default") {
+    await requestNotifications();
+  }
+  updateNotificationUi();
 }
 
 function initNotifications() {
