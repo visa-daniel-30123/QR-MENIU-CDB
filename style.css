@@ -297,6 +297,35 @@ body {
   color: var(--white);
 }
 
+.menu-item__add:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--border);
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+.menu-item--unavailable {
+  opacity: 0.72;
+}
+
+.menu-item--unavailable .menu-item__img {
+  filter: grayscale(0.85);
+}
+
+.menu-item__badge {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 /* Cart — bară sus + finalizare jos */
 
 .cart-top {

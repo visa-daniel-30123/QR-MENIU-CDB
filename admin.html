@@ -52,6 +52,12 @@
 
     <div class="admin-toast" id="admin-toast" hidden role="status" aria-live="assertive"></div>
 
+    <nav class="admin-tabs" aria-label="Secțiuni admin">
+      <button type="button" class="admin-tab admin-tab--active" data-admin-view="orders">Comenzi</button>
+      <button type="button" class="admin-tab" data-admin-view="products">Produse</button>
+    </nav>
+
+    <div id="admin-view-orders">
     <section class="admin-stats" aria-label="Statistici comenzi">
       <div class="admin-stat">
         <span class="admin-stat__value" id="stat-new">0</span>
@@ -79,6 +85,12 @@
       <p class="admin-empty" id="orders-empty" hidden>Nicio comandă în această categorie.</p>
       <div class="orders-list" id="orders-list"></div>
     </main>
+    </div>
+
+    <div id="admin-view-products" class="admin-view--hidden">
+      <p class="products-intro">Marchează produsele care nu mai sunt pe stoc. Clienții nu le vor putea comanda.</p>
+      <div class="products-list" id="products-list"></div>
+    </div>
   </div>
 
   <script>
@@ -135,6 +147,14 @@
           .catch(function (err) {
             console.error(err);
             showError("Ești logat, dar comenzile nu se încarcă. Verifică Firebase și internetul.");
+          });
+
+        import("./admin-products.js")
+          .then(function (mod) {
+            mod.startProductsPanel();
+          })
+          .catch(function (err) {
+            console.error(err);
           });
       }
 

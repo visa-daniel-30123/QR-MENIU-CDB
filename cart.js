@@ -4,6 +4,8 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db, isFirebaseConfigured } from "./firebase-app.js";
+import { getMenuId } from "./menu-catalog.js";
+import { subscribeMenuAvailability } from "./menu-availability.js";
 
 const FRIES_PRICE = 6;
 const BREAD_PRICE = 1;
@@ -28,6 +30,7 @@ let pendingProduct = null;
 let editingCartId = null;
 let cartExpanded = false;
 let qrTableNumber = null;
+let unavailableIds = new Set();
 
 const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",
@@ -665,7 +668,10 @@ function initMenuButtons() {
     const detail = detailEl ? detailEl.textContent.trim() : "";
     const price = parsePrice(priceEl.textContent);
     const productKey = item.dataset.product || "";
+    const menuId = getMenuId(productKey, name, detail);
     const id = slugify(`${name}-${detail}`);
+
+    item.dataset.menuId = menuId;
 
     const btn = document.createElement("button");
     btn.type = "button";
@@ -674,14 +680,51 @@ function initMenuButtons() {
     btn.textContent = "+";
     btn.addEventListener("click", (event) => {
       event.stopPropagation();
+      if (unavailableIds.has(menuId)) return;
+
       if (productKey && PRODUCT_OPTIONS[productKey]) {
-        openOptionsModal(productKey, { id, name, detail, price, productKey });
+        openOptionsModal(productKey, { id, name, detail, price, productKey, menuId });
       } else {
-        addToCart({ id, name, detail, price });
+        addToCart({ id, name, detail, price, menuId });
       }
     });
 
     item.appendChild(btn);
+  });
+
+  applyMenuAvailability();
+}
+
+function applyMenuAvailability() {
+  document.querySelectorAll(".menu-item").forEach((item) => {
+    const menuId = item.dataset.menuId;
+    if (!menuId) return;
+
+    const unavailable = unavailableIds.has(menuId);
+    const btn = item.querySelector(".menu-item__add");
+    const name = item.querySelector(".menu-item__name")?.textContent.trim() || "Produs";
+
+    item.classList.toggle("menu-item--unavailable", unavailable);
+
+    if (btn) {
+      btn.disabled = unavailable;
+      btn.setAttribute(
+        "aria-label",
+        unavailable ? `${name} — indisponibil` : `Adaugă ${name} în coș`
+      );
+    }
+
+    let badge = item.querySelector(".menu-item__badge");
+    if (unavailable) {
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "menu-item__badge";
+        badge.textContent = "Indisponibil";
+        item.querySelector(".menu-item__content")?.appendChild(badge);
+      }
+    } else if (badge) {
+      badge.remove();
+    }
   });
 }
 
@@ -750,6 +793,10 @@ async function submitOrder(event) {
 function init() {
   initTableFromQr();
   initMenuButtons();
+  subscribeMenuAvailability((ids) => {
+    unavailableIds = ids;
+    applyMenuAvailability();
+  });
   renderCart();
 
   els.cartToggle.addEventListener("click", () => setCartExpanded(!cartExpanded));

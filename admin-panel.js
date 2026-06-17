@@ -335,10 +335,27 @@ function initLogout(onLogout) {
   els.logout?.addEventListener("click", onLogout);
 }
 
+function initAdminViews() {
+  const tabs = document.querySelectorAll("[data-admin-view]");
+  const ordersView = document.getElementById("admin-view-orders");
+  const productsView = document.getElementById("admin-view-products");
+  if (!tabs.length || !ordersView || !productsView) return;
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const view = tab.dataset.adminView;
+      tabs.forEach((item) => item.classList.toggle("admin-tab--active", item === tab));
+      ordersView.classList.toggle("admin-view--hidden", view !== "orders");
+      productsView.classList.toggle("admin-view--hidden", view !== "products");
+    });
+  });
+}
+
 export function startAdminPanel(onLogout) {
   if (started) return;
   started = true;
 
+  initAdminViews();
   initFilters();
   initActions();
   initLogout(onLogout);
