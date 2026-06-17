@@ -13,6 +13,7 @@ const PRODUCT_OPTIONS = {
   "meniu-aripioare": { type: "sauce" },
   "meniu-crispy": { type: "sauce" },
   "meniu-cascaval": { type: "sauce" },
+  "hot-dog": { type: "sauces" },
   mici: { type: "grill", unitPrice: 5, pieceLabel: "mici" },
   ceafa: { type: "grill", unitPrice: 20, pieceLabel: "porții" },
   carnaciori: { type: "grill", unitPrice: 5, pieceLabel: "cârnăciori" },
@@ -29,6 +30,7 @@ const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",
   "Meniu Crispy": "meniu-crispy",
   "Meniu Cașcaval Pane": "meniu-cascaval",
+  "Hot Dog": "hot-dog",
   Mici: "mici",
   Ceafă: "ceafa",
   Cârnăciori: "carnaciori",
@@ -97,14 +99,17 @@ function cartTotal() {
 function parseOptionsFromDetail(detail, config) {
   if (!detail) return {};
 
-  if (config.type === "sauce") {
+  if (config.type === "sauce" || config.type === "sauces") {
     const sauceMatch = detail.match(/Sos:\s*(.+?)(?:\s*·|$)/);
-    return {
+    const parsed = {
       sauces: sauceMatch
         ? sauceMatch[1].split(",").map((sauce) => sauce.trim()).filter(Boolean)
         : [],
-      withBread: detail.includes("+ pâine"),
     };
+    if (config.type === "sauce") {
+      parsed.withBread = detail.includes("+ pâine");
+    }
+    return parsed;
   }
 
   const piecesMatch = detail.match(/^(\d+)\s*buc/);
@@ -327,6 +332,28 @@ function renderSauceOptions() {
   updateMenuPrice();
 }
 
+function renderSaucesOnlyOptions() {
+  const init = pendingProduct.editOptions || {};
+  const selectedSauces = getInitialSauces(init);
+
+  els.optionsBody.innerHTML = `
+    <p class="options-modal__hint">Alege până la ${MAX_SAUCES} sosuri:</p>
+    <fieldset class="options-group">
+      <legend class="visually-hidden">Sosuri</legend>
+      ${SAUCES.map(
+        (sauce) => `
+        <label class="options-choice">
+          <input type="checkbox" name="product-sauce" value="${sauce}" ${selectedSauces.includes(sauce) ? "checked" : ""}>
+          <span>${sauce}</span>
+        </label>`
+      ).join("")}
+    </fieldset>
+  `;
+
+  bindSauceLimit('input[name="product-sauce"]');
+  els.optionsPrice.textContent = `${pendingProduct.price} lei`;
+}
+
 function renderGrillOptions(config) {
   const init = pendingProduct.editOptions || {};
 
@@ -404,6 +431,8 @@ function openOptionsModal(productKey, baseProduct) {
 
   if (config.type === "sauce") {
     renderSauceOptions();
+  } else if (config.type === "sauces") {
+    renderSaucesOnlyOptions();
   } else {
     renderGrillOptions(config);
   }
@@ -430,6 +459,8 @@ function openEditModal(item) {
 
   if (config.type === "sauce") {
     renderSauceOptions();
+  } else if (config.type === "sauces") {
+    renderSaucesOnlyOptions();
   } else {
     renderGrillOptions(config);
   }
@@ -477,6 +508,37 @@ function confirmOptions() {
       detail,
       price: pendingProduct.price,
       linePrice,
+      productKey: pendingProduct.productKey,
+      options,
+      customizable: true,
+    });
+  } else if (config.type === "sauces") {
+    const sauces = [...els.optionsBody.querySelectorAll('input[name="product-sauce"]:checked')].map(
+      (input) => input.value
+    );
+
+    if (sauces.length === 0) {
+      els.optionsError.textContent = "Alege cel puțin un sos.";
+      els.optionsError.hidden = false;
+      return;
+    }
+
+    if (sauces.length > MAX_SAUCES) {
+      els.optionsError.textContent = `Poți alege maximum ${MAX_SAUCES} sosuri.`;
+      els.optionsError.hidden = false;
+      return;
+    }
+
+    const detail = `Sos: ${sauces.join(", ")}`;
+    const id = slugify(`${pendingProduct.name}-${sauces.join("-")}`);
+    const options = { sauces };
+
+    finalizeCartProduct({
+      id,
+      name: pendingProduct.name,
+      detail,
+      price: pendingProduct.price,
+      linePrice: pendingProduct.price,
       productKey: pendingProduct.productKey,
       options,
       customizable: true,
