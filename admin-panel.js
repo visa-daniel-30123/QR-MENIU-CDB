@@ -67,6 +67,75 @@ function playNewOrderSound() {
   }
 }
 
+function canUseNotifications() {
+  return "Notification" in window;
+}
+
+function notificationsEnabled() {
+  return canUseNotifications() && Notification.permission === "granted";
+}
+
+async function requestNotifications() {
+  if (!canUseNotifications()) return false;
+  const permission = await Notification.requestPermission();
+  updateNotificationUi();
+  return permission === "granted";
+}
+
+function notifyNewOrder(order) {
+  if (!notificationsEnabled()) return;
+
+  const table = order.tableNumber ? ` · Masa ${order.tableNumber}` : "";
+  const itemCount = Array.isArray(order.items) ? order.items.length : 0;
+  const body = `${order.customerName || "Client"}${table} · ${order.total} lei · ${itemCount} produse`;
+
+  try {
+    const notification = new Notification("Comandă nouă — Casuta dintre brazi", {
+      body,
+      icon: "LOGO CDB.jpg",
+      tag: `order-${order.id}`,
+      renotify: true,
+    });
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+  } catch {
+    /* optional */
+  }
+}
+
+function updateNotificationUi() {
+  const banner = document.getElementById("admin-notify");
+  const button = document.getElementById("admin-notify-btn");
+  if (!banner || !button) return;
+
+  if (!canUseNotifications()) {
+    banner.hidden = true;
+    return;
+  }
+
+  if (Notification.permission === "granted") {
+    banner.hidden = true;
+    return;
+  }
+
+  banner.hidden = false;
+  button.textContent =
+    Notification.permission === "denied"
+      ? "Notificări blocate în browser"
+      : "Activează notificări";
+  button.disabled = Notification.permission === "denied";
+}
+
+function initNotifications() {
+  const button = document.getElementById("admin-notify-btn");
+  button?.addEventListener("click", () => {
+    requestNotifications();
+  });
+  updateNotificationUi();
+}
+
 function updateStats() {
   const counts = { new: 0, preparing: 0, done: 0 };
   orders.forEach((order) => {
@@ -160,7 +229,10 @@ function listenOrders() {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added" && !knownIds.has(change.doc.id)) {
             const data = change.doc.data();
-            if (data.status === "new") playNewOrderSound();
+            if (data.status === "new") {
+              playNewOrderSound();
+              notifyNewOrder({ id: change.doc.id, ...data });
+            }
           }
         });
       }
@@ -220,6 +292,7 @@ export function startAdminPanel(onLogout) {
   initFilters();
   initActions();
   initLogout(onLogout);
+  initNotifications();
 
   if (!isFirebaseConfigured() || !db) {
     showSetupError("Firebase nu e configurat corect în config.js.");
