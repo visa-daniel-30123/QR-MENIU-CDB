@@ -18,6 +18,7 @@
       <div class="header__text">
         <h1 class="header__title">Casuta dintre brazi</h1>
         <p class="header__subtitle">Terasă &amp; meniu</p>
+        <p class="header__table" id="header-table-badge" hidden></p>
       </div>
     </div>
   </header>
@@ -522,12 +523,13 @@
         Comanda a fost trimisă! O pregătim imediat.
       </p>
       <p class="checkout-modal__error" id="cart-error" hidden></p>
+      <p class="checkout-modal__table" id="table-badge" hidden></p>
       <form class="cart-form" id="cart-form">
         <label class="cart-form__label">
           Nume
           <input type="text" name="name" class="cart-form__input" required autocomplete="name" placeholder="Ex: Maria">
         </label>
-        <label class="cart-form__label">
+        <label class="cart-form__label" id="checkout-table-label">
           Nr. masă
           <input type="text" name="table" class="cart-form__input" inputmode="numeric" placeholder="Ex: 5">
         </label>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>QR mese — Casuta dintre brazi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #c41e3a;
+      --red-dark: #9a1830;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f9fafb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Nunito", system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      padding: 1.5rem;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.6rem;
+      color: var(--red-dark);
+    }
+
+    .intro {
+      margin: 0 0 1.5rem;
+      color: var(--muted);
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn--primary {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .btn--ghost {
+      background: #fff;
+      color: var(--red-dark);
+      border: 2px solid var(--border);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .qr-card {
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem;
+      text-align: center;
+      break-inside: avoid;
+    }
+
+    .qr-card__title {
+      margin: 0 0 0.75rem;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--red-dark);
+    }
+
+    .qr-card img {
+      width: 180px;
+      height: 180px;
+      display: block;
+      margin: 0 auto 0.75rem;
+    }
+
+    .qr-card__link {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      word-break: break-all;
+      font-weight: 600;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0.5rem;
+      }
+
+      .actions,
+      .intro {
+        display: none;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+
+      .qr-card {
+        border-color: #ccc;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>QR coduri mese</h1>
+    <p class="intro">
+      Printează aceste 6 coduri și pune câte unul la fiecare masă.
+      Clientul scanează codul și numărul mesei se completează automat la comandă.
+    </p>
+
+    <div class="actions">
+      <button type="button" class="btn btn--primary" onclick="window.print()">Printează</button>
+      <a href="index.html" class="btn btn--ghost">← Înapoi la meniu</a>
+      <a href="admin.html" class="btn btn--ghost">Panou comenzi</a>
+    </div>
+
+    <div class="grid" id="qr-grid"></div>
+  </div>
+
+  <script>
+    (function () {
+      var TABLE_COUNT = 6;
+      var grid = document.getElementById("qr-grid");
+      var menuBase = new URL("index.html", window.location.href);
+
+      for (var i = 1; i <= TABLE_COUNT; i += 1) {
+        var link = new URL(menuBase.href);
+        link.searchParams.set("masa", String(i));
+        var href = link.toString();
+        var qrSrc =
+          "https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&data=" +
+          encodeURIComponent(href);
+
+        var card = document.createElement("article");
+        card.className = "qr-card";
+        card.innerHTML =
+          '<h2 class="qr-card__title">Masa ' +
+          i +
+          "</h2>" +
+          '<img src="' +
+          qrSrc +
+          '" alt="QR masa ' +
+          i +
+          '" width="180" height="180">' +
+          '<span class="qr-card__link">' +
+          href +
+          "</span>";
+
+        grid.appendChild(card);
+      }
+    })();
+  </script>
+</body>
+</html>

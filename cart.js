@@ -8,6 +8,8 @@ import { db, isFirebaseConfigured } from "./firebase-app.js";
 const FRIES_PRICE = 6;
 const BREAD_PRICE = 1;
 const MAX_SAUCES = 2;
+const TABLE_COUNT = 6;
+const TABLE_STORAGE_KEY = "cdb-table-number";
 
 const PRODUCT_OPTIONS = {
   "meniu-aripioare": { type: "sauce" },
@@ -25,6 +27,7 @@ const cart = new Map();
 let pendingProduct = null;
 let editingCartId = null;
 let cartExpanded = false;
+let qrTableNumber = null;
 
 const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",
@@ -154,6 +157,65 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;");
 }
 
+function parseTableParam() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("masa") || params.get("table");
+  if (!raw) return null;
+
+  const tableNumber = Number.parseInt(raw, 10);
+  if (Number.isNaN(tableNumber) || tableNumber < 1 || tableNumber > TABLE_COUNT) {
+    return null;
+  }
+
+  return String(tableNumber);
+}
+
+function initTableFromQr() {
+  const fromUrl = parseTableParam();
+  if (fromUrl) {
+    sessionStorage.setItem(TABLE_STORAGE_KEY, fromUrl);
+    qrTableNumber = fromUrl;
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("masa");
+    url.searchParams.delete("table");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  } else {
+    qrTableNumber = sessionStorage.getItem(TABLE_STORAGE_KEY);
+  }
+
+  applyTableUi();
+}
+
+function applyTableUi() {
+  const tableLabel = document.getElementById("checkout-table-label");
+  const tableInput = els.form?.querySelector('[name="table"]');
+  const tableBadge = document.getElementById("table-badge");
+  const headerBadge = document.getElementById("header-table-badge");
+
+  if (qrTableNumber) {
+    if (tableInput) {
+      tableInput.value = qrTableNumber;
+      tableInput.hidden = true;
+    }
+    if (tableLabel) tableLabel.hidden = true;
+    if (tableBadge) {
+      tableBadge.textContent = `Comandă pentru masa ${qrTableNumber}`;
+      tableBadge.hidden = false;
+    }
+    if (headerBadge) {
+      headerBadge.textContent = `Masă ${qrTableNumber}`;
+      headerBadge.hidden = false;
+    }
+    return;
+  }
+
+  if (tableInput) tableInput.hidden = false;
+  if (tableLabel) tableLabel.hidden = false;
+  if (tableBadge) tableBadge.hidden = true;
+  if (headerBadge) headerBadge.hidden = true;
+}
+
 function setCartExpanded(open) {
   cartExpanded = open;
   els.cartTopBody.hidden = !open;
@@ -179,6 +241,7 @@ function openCheckout() {
     els.submit.disabled = false;
   }
 
+  applyTableUi();
   els.checkoutModal.showModal();
 }
 
@@ -635,7 +698,7 @@ async function submitOrder(event) {
 
   const formData = new FormData(els.form);
   const customerName = formData.get("name").toString().trim();
-  const tableNumber = formData.get("table").toString().trim();
+  const tableNumber = qrTableNumber || formData.get("table").toString().trim();
   const notes = formData.get("notes").toString().trim();
 
   if (!customerName) {
@@ -666,6 +729,7 @@ async function submitOrder(event) {
     cart.clear();
     renderCart();
     els.form.reset();
+    applyTableUi();
     els.success.hidden = false;
     setCartExpanded(false);
     setTimeout(() => {
@@ -682,6 +746,7 @@ async function submitOrder(event) {
 }
 
 function init() {
+  initTableFromQr();
   initMenuButtons();
   renderCart();
 
