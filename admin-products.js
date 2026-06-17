@@ -1,11 +1,11 @@
-import { MENU_PRODUCTS, isMenuIdUnavailable } from "./menu-catalog.js?v=3";
+import { MENU_PRODUCTS, isMenuIdUnavailable } from "./menu-catalog.js?v=4";
 import {
   subscribeMenuAvailability,
   toggleProductAvailability,
-  repairMenuAvailability,
-} from "./menu-availability.js?v=3";
+} from "./menu-availability.js?v=4";
 
 let unavailableIds = new Set();
+let lastStockUpdatedAt = 0;
 let unsubscribe = null;
 let started = false;
 
@@ -109,8 +109,9 @@ function initProductActions() {
     button.disabled = true;
 
     try {
-      const nextIds = await toggleProductAvailability(menuId, unavailableIds);
-      unavailableIds = nextIds;
+      const result = await toggleProductAvailability(menuId, unavailableIds);
+      unavailableIds = result.ids;
+      lastStockUpdatedAt = result.updatedAt;
       renderProductsList();
     } catch (err) {
       console.error(err);
@@ -136,7 +137,9 @@ export function startProductsPanel() {
 
   if (unsubscribe) unsubscribe();
   unsubscribe = subscribeMenuAvailability(
-    (ids) => {
+    (ids, updatedAt) => {
+      if (updatedAt < lastStockUpdatedAt) return;
+      lastStockUpdatedAt = updatedAt;
       unavailableIds = ids;
       renderProductsList();
       showProductsStatus("Stoc sincronizat — actualizare live pe toate mesele (QR 1–6).");
@@ -148,13 +151,6 @@ export function startProductsPanel() {
       showProductsStatus("Stocul nu e sincronizat — verifică regulile Firebase.", true);
     }
   );
-
-  repairMenuAvailability()
-    .then((ids) => {
-      unavailableIds = ids;
-      renderProductsList();
-    })
-    .catch((err) => console.warn("repair menu availability:", err));
 }
 
 export function stopProductsPanel() {

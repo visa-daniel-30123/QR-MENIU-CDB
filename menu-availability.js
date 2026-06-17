@@ -24,28 +24,35 @@ function idsFromSnapshot(snapshot) {
   return normalizeUnavailableIds(raw);
 }
 
+function updatedAtFromSnapshot(snapshot) {
+  if (!snapshot.exists()) return 0;
+  const value = snapshot.data()?.updatedAt;
+  return typeof value === "number" ? value : 0;
+}
+
 async function readAvailabilityFromServer() {
   try {
     const snapshot = await getDocFromServer(MENU_STATE_REF);
-    return idsFromSnapshot(snapshot);
+    return {
+      ids: idsFromSnapshot(snapshot),
+      updatedAt: updatedAtFromSnapshot(snapshot),
+    };
   } catch (err) {
     console.warn("read menu/availability from server:", err);
-    return new Set();
+    return { ids: new Set(), updatedAt: 0 };
   }
 }
 
 export function subscribeMenuAvailability(callback, onError) {
   if (!db) {
-    callback(new Set());
+    callback(new Set(), 0);
     return () => {};
   }
 
   return onSnapshot(
     MENU_STATE_REF,
-    { includeMetadataChanges: true },
     (snapshot) => {
-      if (snapshot.metadata.fromCache) return;
-      callback(idsFromSnapshot(snapshot));
+      callback(idsFromSnapshot(snapshot), updatedAtFromSnapshot(snapshot));
     },
     (error) => {
       console.error("menu availability subscribe error:", error);
@@ -56,13 +63,14 @@ export function subscribeMenuAvailability(callback, onError) {
 
 export async function refreshMenuAvailability() {
   if (!db) return new Set();
-  return readAvailabilityFromServer();
+  const state = await readAvailabilityFromServer();
+  return state.ids;
 }
 
-async function writeAvailabilityState(unavailableIds) {
+async function writeAvailabilityState(unavailableIds, updatedAt = Date.now()) {
   const payload = {
     unavailableIds: [...unavailableIds],
-    updatedAt: Date.now(),
+    updatedAt,
   };
 
   const errors = [];
@@ -82,14 +90,8 @@ async function writeAvailabilityState(unavailableIds) {
   if (errors.length === 2) {
     throw errors[0];
   }
-}
 
-export async function repairMenuAvailability() {
-  if (!db) return new Set();
-
-  const canonical = await readAvailabilityFromServer();
-  await writeAvailabilityState(canonical);
-  return canonical;
+  return updatedAt;
 }
 
 export async function toggleProductAvailability(menuId, currentUnavailableIds) {
@@ -106,6 +108,6 @@ export async function toggleProductAvailability(menuId, currentUnavailableIds) {
     unavailableIds.add(canonical);
   }
 
-  await writeAvailabilityState(unavailableIds);
-  return unavailableIds;
+  const updatedAt = await writeAvailabilityState(unavailableIds);
+  return { ids: unavailableIds, updatedAt };
 }

@@ -4,8 +4,8 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db, isFirebaseConfigured } from "./firebase-app.js";
-import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=3";
-import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=3";
+import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=4";
+import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=4";
 
 const FRIES_PRICE = 6;
 const BREAD_PRICE = 1;
