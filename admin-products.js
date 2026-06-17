@@ -86,7 +86,14 @@ function initProductActions() {
       await toggleProductAvailability(menuId);
     } catch (err) {
       console.error(err);
-      alert("Nu am putut actualiza produsul.");
+      const code = err?.code || "";
+      if (code === "permission-denied") {
+        alert(
+          "Firebase blochează salvarea. În Firebase Console → Firestore → Rules, adaugă permisiuni pentru settings/menu și apasă Publish."
+        );
+      } else {
+        alert(`Nu am putut actualiza produsul: ${err?.message || "eroare necunoscută"}`);
+      }
     } finally {
       button.disabled = false;
     }
