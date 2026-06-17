@@ -34,6 +34,11 @@ function renderProductsList() {
   const groups = groupProductsByCategory();
   list.innerHTML = "";
 
+  if (MENU_PRODUCTS.length === 0) {
+    list.innerHTML = '<p class="products-empty">Nu există produse în catalog.</p>';
+    return;
+  }
+
   groups.forEach((products, category) => {
     const section = document.createElement("section");
     section.className = "products-group";
@@ -50,13 +55,14 @@ function renderProductsList() {
         <div class="product-row__info">
           <span class="product-row__name">${escapeHtml(product.name)}</span>
           <span class="product-row__detail">${escapeHtml(product.detail)}</span>
+          ${unavailable ? '<span class="product-row__status">Indisponibil acum</span>' : ""}
         </div>
         <button
           type="button"
-          class="product-row__toggle${unavailable ? " product-row__toggle--active" : ""}"
+          class="product-row__toggle${unavailable ? " product-row__toggle--restore" : " product-row__toggle--block"}"
           data-menu-id="${product.id}"
         >
-          ${unavailable ? "Indisponibil" : "Disponibil"}
+          ${unavailable ? "Pune disponibil" : "Marchează indisponibil"}
         </button>
       `;
       rows.appendChild(row);
@@ -92,6 +98,7 @@ export function startProductsPanel() {
   started = true;
 
   initProductActions();
+  renderProductsList();
 
   if (unsubscribe) unsubscribe();
   unsubscribe = subscribeMenuAvailability((ids) => {

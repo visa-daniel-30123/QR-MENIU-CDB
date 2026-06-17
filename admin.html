@@ -54,7 +54,7 @@
 
     <nav class="admin-tabs" aria-label="Secțiuni admin">
       <button type="button" class="admin-tab admin-tab--active" data-admin-view="orders">Comenzi</button>
-      <button type="button" class="admin-tab" data-admin-view="products">Produse</button>
+      <button type="button" class="admin-tab" data-admin-view="products">Produse / Stoc</button>
     </nav>
 
     <div id="admin-view-orders">
@@ -88,8 +88,8 @@
     </div>
 
     <div id="admin-view-products" class="admin-view--hidden">
-      <p class="products-intro">Marchează produsele care nu mai sunt pe stoc. Clienții nu le vor putea comanda.</p>
-      <div class="products-list" id="products-list"></div>
+      <p class="products-intro">Apasă <strong>Marchează indisponibil</strong> la produsele care nu mai sunt pe stoc. Clienții nu le vor putea comanda.</p>
+      <div id="products-list"></div>
     </div>
   </div>
 
@@ -155,6 +155,7 @@
           })
           .catch(function (err) {
             console.error(err);
+            showError("Nu s-a încărcat lista de produse. Reîncarcă pagina.");
           });
       }
 
