@@ -21,6 +21,13 @@ const PRODUCT_OPTIONS = {
   mici: { type: "grill", unitPrice: 5, pieceLabel: "mici" },
   ceafa: { type: "grill", unitPrice: 20, pieceLabel: "porții" },
   carnaciori: { type: "grill", unitPrice: 5, pieceLabel: "cârnăciori" },
+  "farfurie-gratar": { type: "plate" },
+};
+
+const PLATE_GRILL = {
+  mici: { label: "Mici", unitPrice: 5, unit: "mici" },
+  carnaciori: { label: "Cârnăciori", unitPrice: 5, unit: "cârnăciori" },
+  ceafa: { label: "Ceafă", unitPrice: 20, unit: "ceafă" },
 };
 
 const SAUCES = ["Ketchup", "Muștar", "Maioneză", "Usturoi"];
@@ -40,6 +47,7 @@ const PRODUCT_KEY_BY_NAME = {
   Mici: "mici",
   Ceafă: "ceafa",
   Cârnăciori: "carnaciori",
+  "Farfurie la grătar": "farfurie-gratar",
 };
 
 const els = {
@@ -116,6 +124,20 @@ function parseOptionsFromDetail(detail, config) {
       parsed.withBread = detail.includes("+ pâine");
     }
     return parsed;
+  }
+
+  if (config.type === "plate") {
+    const sauceMatch = detail.match(/Sos:\s*(.+)$/);
+    return {
+      mici: Number(detail.match(/(\d+)\s*mici/)?.[1] || 0),
+      carnaciori: Number(detail.match(/(\d+)\s*carnaciori/)?.[1] || 0),
+      ceafa: Number(detail.match(/(\d+)\s*ceaf[aă]/i)?.[1] || 0),
+      withFries: detail.includes("cartofi"),
+      withBread: detail.includes("+ pâine"),
+      sauces: sauceMatch
+        ? sauceMatch[1].split(",").map((sauce) => sauce.trim()).filter(Boolean)
+        : [],
+    };
   }
 
   const piecesMatch = detail.match(/^(\d+)\s*buc/);
@@ -487,6 +509,115 @@ function calcGrillPrice(config) {
   );
 }
 
+function clampPlateQty(value) {
+  return Math.min(30, Math.max(0, Number(value) || 0));
+}
+
+function getPlateQuantities() {
+  return {
+    mici: clampPlateQty(document.getElementById("plate-mici")?.value),
+    carnaciori: clampPlateQty(document.getElementById("plate-carnaciori")?.value),
+    ceafa: clampPlateQty(document.getElementById("plate-ceafa")?.value),
+  };
+}
+
+function calcPlatePrice() {
+  const quantities = getPlateQuantities();
+  const withFries = document.getElementById("plate-fries")?.checked;
+  const withBread = document.getElementById("plate-bread")?.checked;
+
+  return (
+    quantities.mici * PLATE_GRILL.mici.unitPrice +
+    quantities.carnaciori * PLATE_GRILL.carnaciori.unitPrice +
+    quantities.ceafa * PLATE_GRILL.ceafa.unitPrice +
+    (withFries ? FRIES_PRICE : 0) +
+    (withBread ? BREAD_PRICE : 0)
+  );
+}
+
+function renderPlateRow(key, init) {
+  const item = PLATE_GRILL[key];
+  const value = init[key] ?? 0;
+
+  return `
+    <div class="plate-row">
+      <div class="plate-row__head">
+        <span class="plate-row__name">${item.label}</span>
+        <span class="plate-row__price">${item.unitPrice} lei/buc</span>
+      </div>
+      <div class="options-stepper">
+        <button type="button" class="options-stepper__btn" data-plate-step="-1" data-plate="${key}" aria-label="Mai puține ${item.label}">−</button>
+        <input type="number" class="options-stepper__input" id="plate-${key}" value="${value}" min="0" max="30" inputmode="numeric">
+        <button type="button" class="options-stepper__btn" data-plate-step="1" data-plate="${key}" aria-label="Mai multe ${item.label}">+</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderPlateOptions() {
+  const init = pendingProduct.editOptions || {};
+
+  els.optionsBody.innerHTML = `
+    <p class="options-modal__hint">Alege ce pui pe farfurie:</p>
+    ${renderPlateRow("mici", init)}
+    ${renderPlateRow("carnaciori", init)}
+    ${renderPlateRow("ceafa", init)}
+    <label class="options-check">
+      <input type="checkbox" id="plate-fries" ${init.withFries ? "checked" : ""}>
+      <span>Cartofi prăjiți <strong>+${FRIES_PRICE} lei</strong></span>
+    </label>
+    <label class="options-check">
+      <input type="checkbox" id="plate-bread" ${init.withBread ? "checked" : ""}>
+      <span>Pâine <strong>+${BREAD_PRICE} leu</strong></span>
+    </label>
+    <p class="options-modal__hint">Alege până la ${MAX_SAUCES} sosuri (opțional):</p>
+    <fieldset class="options-group">
+      <legend class="visually-hidden">Sosuri</legend>
+      ${SAUCES.map(
+        (sauce) => `
+        <label class="options-choice">
+          <input type="checkbox" name="plate-sauce" value="${sauce}" ${(init.sauces || []).includes(sauce) ? "checked" : ""}>
+          <span>${sauce}</span>
+        </label>`
+      ).join("")}
+    </fieldset>
+  `;
+
+  const updatePlatePrice = () => {
+    els.optionsPrice.textContent = `${calcPlatePrice()} lei`;
+  };
+
+  els.optionsBody.querySelectorAll("[data-plate-step]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.plate;
+      const input = document.getElementById(`plate-${key}`);
+      const next = clampPlateQty(Number(input.value) + Number(btn.dataset.plateStep));
+      input.value = String(next);
+      updatePlatePrice();
+    });
+  });
+
+  ["mici", "carnaciori", "ceafa"].forEach((key) => {
+    document.getElementById(`plate-${key}`)?.addEventListener("input", updatePlatePrice);
+  });
+
+  document.getElementById("plate-fries")?.addEventListener("change", updatePlatePrice);
+  document.getElementById("plate-bread")?.addEventListener("change", updatePlatePrice);
+  bindSauceLimit('input[name="plate-sauce"]');
+  updatePlatePrice();
+}
+
+function buildPlateDetail(quantities, withFries, withBread, sauces) {
+  const detailParts = [];
+  if (quantities.mici > 0) detailParts.push(`${quantities.mici} mici`);
+  if (quantities.carnaciori > 0) detailParts.push(`${quantities.carnaciori} cârnăciori`);
+  if (quantities.ceafa > 0) detailParts.push(`${quantities.ceafa} ceafă`);
+  if (withFries) detailParts.push("+ cartofi prăjiți");
+  if (withBread) detailParts.push("+ pâine");
+  if (sauces.length) detailParts.push(`Sos: ${sauces.join(", ")}`);
+  return detailParts.join(" · ");
+}
+
 function openOptionsModal(productKey, baseProduct) {
   const config = PRODUCT_OPTIONS[productKey];
   if (!config) return;
@@ -501,6 +632,8 @@ function openOptionsModal(productKey, baseProduct) {
     renderSauceOptions();
   } else if (config.type === "sauces") {
     renderSaucesOnlyOptions();
+  } else if (config.type === "plate") {
+    renderPlateOptions();
   } else {
     renderGrillOptions(config);
   }
@@ -529,6 +662,8 @@ function openEditModal(item) {
     renderSauceOptions();
   } else if (config.type === "sauces") {
     renderSaucesOnlyOptions();
+  } else if (config.type === "plate") {
+    renderPlateOptions();
   } else {
     renderGrillOptions(config);
   }
@@ -607,6 +742,43 @@ function confirmOptions() {
       detail,
       price: pendingProduct.price,
       linePrice: pendingProduct.price,
+      productKey: pendingProduct.productKey,
+      options,
+      customizable: true,
+    });
+  } else if (config.type === "plate") {
+    const quantities = getPlateQuantities();
+    const withFries = document.getElementById("plate-fries")?.checked;
+    const withBread = document.getElementById("plate-bread")?.checked;
+    const sauces = [...els.optionsBody.querySelectorAll('input[name="plate-sauce"]:checked')].map(
+      (input) => input.value
+    );
+
+    if (quantities.mici + quantities.carnaciori + quantities.ceafa === 0) {
+      els.optionsError.textContent = "Alege cel puțin un preparat pe farfurie.";
+      els.optionsError.hidden = false;
+      return;
+    }
+
+    if (sauces.length > MAX_SAUCES) {
+      els.optionsError.textContent = `Poți alege maximum ${MAX_SAUCES} sosuri.`;
+      els.optionsError.hidden = false;
+      return;
+    }
+
+    const linePrice = calcPlatePrice();
+    const detail = buildPlateDetail(quantities, withFries, withBread, sauces);
+    const id = slugify(
+      `farfurie-${quantities.mici}m-${quantities.carnaciori}c-${quantities.ceafa}ce-${withFries ? "fries" : "nofries"}-${withBread ? "bread" : "nobread"}-${sauces.join("-") || "nosauce"}`
+    );
+    const options = { ...quantities, withFries, withBread, sauces };
+
+    finalizeCartProduct({
+      id,
+      name: pendingProduct.name,
+      detail,
+      price: pendingProduct.price,
+      linePrice,
       productKey: pendingProduct.productKey,
       options,
       customizable: true,

@@ -827,6 +827,33 @@ body {
   margin-left: 0.25rem;
 }
 
+.plate-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg);
+  border-radius: 12px;
+}
+
+.plate-row__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.plate-row__name {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.plate-row__price {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
 .options-check {
   display: flex;
   align-items: flex-start;

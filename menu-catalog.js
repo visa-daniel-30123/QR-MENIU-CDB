@@ -21,6 +21,12 @@ const MENU_ITEMS_RAW = [
   { productKey: "mici", name: "Mici", detail: "70 gr", category: "Preparate la grătar" },
   { productKey: "ceafa", name: "Ceafă", detail: "200 gr", category: "Preparate la grătar" },
   { productKey: "carnaciori", name: "Cârnăciori", detail: "50 gr", category: "Preparate la grătar" },
+  {
+    productKey: "farfurie-gratar",
+    name: "Farfurie la grătar",
+    detail: "Mici / cârnăciori / ceafă la alegere",
+    category: "Preparate la grătar",
+  },
   { name: "Chiflă / pâine", detail: "50 gr", category: "Preparate la grătar" },
   { name: "Kürtős Kalács", detail: "400 gr", category: "Dulciuri" },
   { name: "Kürtős cu înghețată", detail: "250 gr", category: "Dulciuri" },
