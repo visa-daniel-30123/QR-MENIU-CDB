@@ -529,6 +529,25 @@ body {
   font-weight: 600;
 }
 
+.cart-item__edit {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--red);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cart-item__edit:hover {
+  color: var(--red-dark);
+}
+
 .cart-item__controls {
   display: flex;
   align-items: center;
