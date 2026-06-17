@@ -8,6 +8,14 @@ let unavailableIds = new Set();
 let unsubscribe = null;
 let started = false;
 
+function showProductsStatus(message, isError = false) {
+  const status = document.getElementById("products-status");
+  if (!status) return;
+  status.textContent = message;
+  status.hidden = false;
+  status.classList.toggle("products-status--error", isError);
+}
+
 function showProductsError(message) {
   const list = document.getElementById("products-list");
   if (!list) return;
@@ -107,7 +115,7 @@ function initProductActions() {
       console.error(err);
       if (isPermissionError(err)) {
         alert(
-          "Firebase blochează salvarea.\n\nÎn Firebase Console → Firestore → Rules, adaugă:\n\nmatch /menu/{docId} {\n  allow read, write: if true;\n}\n\nApoi Publish și reîncarcă pagina."
+          "Firebase blochează salvarea pe proiectul qr-cdb.\n\nÎn Firebase Console → Firestore → Rules, lipește TOT fișierul de reguli (nu doar un fragment) și apasă Publish.\n\nTrebuie să existe blocurile pentru orders, menu și settings."
         );
       } else {
         alert(`Nu am putut actualiza produsul:\n${formatFirestoreError(err)}`);
@@ -130,11 +138,13 @@ export function startProductsPanel() {
     (ids) => {
       unavailableIds = ids;
       renderProductsList();
+      showProductsStatus("Stoc sincronizat — actualizare live pe toate mesele (QR 1–6).");
     },
     (err) => {
       showProductsError(
-        `Nu pot citi stocul din Firebase: ${formatFirestoreError(err)}. Verifică regulile Firestore pentru colecția menu.`
+        `Nu pot citi stocul din Firebase: ${formatFirestoreError(err)}. Verifică regulile Firestore (menu + settings).`
       );
+      showProductsStatus("Stocul nu e sincronizat — verifică regulile Firebase.", true);
     }
   );
 }
