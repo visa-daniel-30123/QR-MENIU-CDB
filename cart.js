@@ -175,13 +175,15 @@ function initTableFromQr() {
   if (fromUrl) {
     sessionStorage.setItem(TABLE_STORAGE_KEY, fromUrl);
     qrTableNumber = fromUrl;
-
-    const url = new URL(window.location.href);
-    url.searchParams.delete("masa");
-    url.searchParams.delete("table");
-    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   } else {
     qrTableNumber = sessionStorage.getItem(TABLE_STORAGE_KEY);
+    if (qrTableNumber) {
+      const url = new URL(window.location.href);
+      if (!url.searchParams.get("masa") && !url.searchParams.get("table")) {
+        url.searchParams.set("masa", qrTableNumber);
+        window.history.replaceState({}, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
+      }
+    }
   }
 
   applyTableUi();
