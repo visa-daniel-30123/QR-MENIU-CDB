@@ -304,6 +304,13 @@ body {
   font-weight: 700;
 }
 
+.products-empty--error {
+  color: var(--red-dark);
+  background: var(--red-light);
+  border-radius: var(--radius);
+  line-height: 1.5;
+}
+
 .admin-header {
   display: flex;
   align-items: center;

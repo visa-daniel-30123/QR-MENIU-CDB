@@ -8,6 +8,23 @@ let unavailableIds = new Set();
 let unsubscribe = null;
 let started = false;
 
+function showProductsError(message) {
+  const list = document.getElementById("products-list");
+  if (!list) return;
+  list.innerHTML = `<p class="products-empty products-empty--error">${escapeHtml(message)}</p>`;
+}
+
+function formatFirestoreError(err) {
+  const code = err?.code ? String(err.code) : "";
+  const message = err?.message ? String(err.message) : "Eroare necunoscută";
+  return `${code ? `${code}: ` : ""}${message}`;
+}
+
+function isPermissionError(err) {
+  const text = `${err?.code || ""} ${err?.message || ""}`.toLowerCase();
+  return text.includes("permission") || text.includes("insufficient");
+}
+
 function escapeHtml(text) {
   return text
     .replace(/&/g, "&amp;")
@@ -83,16 +100,17 @@ function initProductActions() {
     button.disabled = true;
 
     try {
-      await toggleProductAvailability(menuId);
+      const nextIds = await toggleProductAvailability(menuId, unavailableIds);
+      unavailableIds = nextIds;
+      renderProductsList();
     } catch (err) {
       console.error(err);
-      const code = err?.code || "";
-      if (code === "permission-denied") {
+      if (isPermissionError(err)) {
         alert(
-          "Firebase blochează salvarea. În Firebase Console → Firestore → Rules, adaugă permisiuni pentru settings/menu și apasă Publish."
+          "Firebase blochează salvarea.\n\nÎn Firebase Console → Firestore → Rules, adaugă:\n\nmatch /menu/{docId} {\n  allow read, write: if true;\n}\n\nApoi Publish și reîncarcă pagina."
         );
       } else {
-        alert(`Nu am putut actualiza produsul: ${err?.message || "eroare necunoscută"}`);
+        alert(`Nu am putut actualiza produsul:\n${formatFirestoreError(err)}`);
       }
     } finally {
       button.disabled = false;
@@ -108,10 +126,17 @@ export function startProductsPanel() {
   renderProductsList();
 
   if (unsubscribe) unsubscribe();
-  unsubscribe = subscribeMenuAvailability((ids) => {
-    unavailableIds = ids;
-    renderProductsList();
-  });
+  unsubscribe = subscribeMenuAvailability(
+    (ids) => {
+      unavailableIds = ids;
+      renderProductsList();
+    },
+    (err) => {
+      showProductsError(
+        `Nu pot citi stocul din Firebase: ${formatFirestoreError(err)}. Verifică regulile Firestore pentru colecția menu.`
+      );
+    }
+  );
 }
 
 export function stopProductsPanel() {
