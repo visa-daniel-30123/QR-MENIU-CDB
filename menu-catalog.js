@@ -57,6 +57,51 @@ const MENU_ITEMS_RAW = [
   { name: "Bergenbier Grapefruit NA", detail: "0,5 L", category: "Bere fără alcool" },
 ];
 
+const MENU_ID_INDEX = buildMenuIdIndex();
+
+function buildMenuIdIndex() {
+  const aliasToCanonical = new Map();
+  const canonicalToAliases = new Map();
+
+  MENU_ITEMS_RAW.forEach((item) => {
+    const canonical = getMenuId(item.productKey, item.name, item.detail);
+    const aliases = new Set([canonical, slugify(`${item.name}-${item.detail || ""}`)]);
+    if (item.productKey) aliases.add(item.productKey);
+
+    canonicalToAliases.set(canonical, aliases);
+    aliases.forEach((alias) => aliasToCanonical.set(alias, canonical));
+  });
+
+  // ID-uri greșite salvate manual în Firebase
+  aliasToCanonical.set("hot=dog", "hot-dog");
+  aliasToCanonical.set("hot_dog", "hot-dog");
+  aliasToCanonical.set("hotdog", "hot-dog");
+
+  return { aliasToCanonical, canonicalToAliases };
+}
+
+export function resolveCanonicalMenuId(id) {
+  if (typeof id !== "string") return "";
+  const trimmed = id.trim().toLowerCase();
+  return MENU_ID_INDEX.aliasToCanonical.get(trimmed) || trimmed;
+}
+
+export function getProductIdVariants(canonicalId) {
+  return MENU_ID_INDEX.canonicalToAliases.get(canonicalId) || new Set([canonicalId]);
+}
+
+export function normalizeUnavailableIds(ids) {
+  const normalized = new Set();
+  (ids instanceof Set ? [...ids] : ids).forEach((id) => {
+    normalized.add(resolveCanonicalMenuId(id));
+  });
+  return normalized;
+}
+
+export function isMenuIdUnavailable(menuId, unavailableIds) {
+  return unavailableIds.has(resolveCanonicalMenuId(menuId));
+}
+
 export const MENU_PRODUCTS = MENU_ITEMS_RAW.map((item) => ({
   id: getMenuId(item.productKey, item.name, item.detail),
   name: item.name,

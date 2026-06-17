@@ -1,8 +1,9 @@
-import { MENU_PRODUCTS } from "./menu-catalog.js";
+import { MENU_PRODUCTS, isMenuIdUnavailable } from "./menu-catalog.js?v=3";
 import {
   subscribeMenuAvailability,
   toggleProductAvailability,
-} from "./menu-availability.js";
+  repairMenuAvailability,
+} from "./menu-availability.js?v=3";
 
 let unavailableIds = new Set();
 let unsubscribe = null;
@@ -73,7 +74,7 @@ function renderProductsList() {
     rows.className = "products-group__list";
 
     products.forEach((product) => {
-      const unavailable = unavailableIds.has(product.id);
+      const unavailable = isMenuIdUnavailable(product.id, unavailableIds);
       const row = document.createElement("div");
       row.className = `product-row${unavailable ? " product-row--unavailable" : ""}`;
       row.innerHTML = `
@@ -147,6 +148,13 @@ export function startProductsPanel() {
       showProductsStatus("Stocul nu e sincronizat — verifică regulile Firebase.", true);
     }
   );
+
+  repairMenuAvailability()
+    .then((ids) => {
+      unavailableIds = ids;
+      renderProductsList();
+    })
+    .catch((err) => console.warn("repair menu availability:", err));
 }
 
 export function stopProductsPanel() {

@@ -4,8 +4,8 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db, isFirebaseConfigured } from "./firebase-app.js";
-import { getMenuId } from "./menu-catalog.js";
-import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js";
+import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=3";
+import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=3";
 
 const FRIES_PRICE = 6;
 const BREAD_PRICE = 1;
@@ -291,7 +291,7 @@ function renderDrinkUpsellList() {
 
   els.drinkUpsellList.innerHTML = "";
   DRINK_RECOMMENDATIONS.forEach((drink) => {
-    const unavailable = unavailableIds.has(drink.menuId);
+    const unavailable = isMenuIdUnavailable(drink.menuId, unavailableIds);
     const inCart = [...cart.values()].some(
       (item) => item.menuId === drink.menuId || item.id === drink.id
     );
@@ -946,7 +946,8 @@ function initMenuButtons() {
     const name = nameEl.textContent.trim();
     const detail = detailEl ? detailEl.textContent.trim() : "";
     const price = parsePrice(priceEl.textContent);
-    const productKey = item.dataset.product || "";
+    const productKey =
+      item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[name] || "";
     const menuId = getMenuId(productKey, name, detail);
     const id = slugify(`${name}-${detail}`);
     const menuCategory = item.closest(".category")?.dataset.category || "";
@@ -960,7 +961,7 @@ function initMenuButtons() {
     btn.textContent = "+";
     btn.addEventListener("click", (event) => {
       event.stopPropagation();
-      if (unavailableIds.has(menuId)) return;
+      if (isMenuIdUnavailable(menuId, unavailableIds)) return;
 
       if (productKey && PRODUCT_OPTIONS[productKey]) {
         openOptionsModal(productKey, { id, name, detail, price, productKey, menuId, menuCategory });
@@ -977,12 +978,19 @@ function initMenuButtons() {
 
 function applyMenuAvailability() {
   document.querySelectorAll(".menu-item").forEach((item) => {
-    const menuId = item.dataset.menuId;
-    if (!menuId) return;
+    const nameEl = item.querySelector(".menu-item__name");
+    const priceEl = item.querySelector(".menu-item__price");
+    if (!nameEl || !priceEl) return;
 
-    const unavailable = unavailableIds.has(menuId);
+    const name = nameEl.textContent.trim();
+    const detail = item.querySelector(".menu-item__detail")?.textContent.trim() || "";
+    const productKey =
+      item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[name] || "";
+    const menuId = getMenuId(productKey, name, detail);
+    item.dataset.menuId = menuId;
+
+    const unavailable = isMenuIdUnavailable(menuId, unavailableIds);
     const btn = item.querySelector(".menu-item__add");
-    const name = item.querySelector(".menu-item__name")?.textContent.trim() || "Produs";
 
     item.classList.toggle("menu-item--unavailable", unavailable);
 
@@ -1077,12 +1085,6 @@ function init() {
     unavailableIds = ids;
     applyMenuAvailability();
   });
-  refreshMenuAvailability()
-    .then((ids) => {
-      unavailableIds = ids;
-      applyMenuAvailability();
-    })
-    .catch((err) => console.warn("refresh menu availability:", err));
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible") return;
