@@ -45,10 +45,24 @@
     </header>
 
     <p class="admin-notify" id="admin-notify" hidden>
-      <span>Primește alertă pe telefon sau laptop când vine o comandă nouă.</span>
-      <button type="button" class="admin-notify__btn" id="admin-notify-btn">Activează notificări</button>
+      <span class="admin-notify__text" id="admin-notify-text">
+        Pentru alerte pe telefon: apasă <strong>Activează notificări</strong>, apoi <strong>Test</strong>.
+        Pe iPhone: Safari → Share → Adaugă pe ecranul principal.
+      </span>
+      <span class="admin-notify__actions">
+        <button type="button" class="admin-notify__btn admin-notify__btn--ghost" id="admin-notify-test">Test</button>
+        <button type="button" class="admin-notify__btn" id="admin-notify-btn">Activează notificări</button>
+      </span>
     </p>
     <p class="admin-notify admin-notify--active" id="admin-notify-active" hidden>🔔 Notificări active pe acest dispozitiv</p>
+
+    <div class="admin-order-alert" id="admin-order-alert" hidden role="alert" aria-live="assertive">
+      <div class="admin-order-alert__body">
+        <strong class="admin-order-alert__title">Comandă nouă!</strong>
+        <p class="admin-order-alert__text" id="admin-order-alert-text"></p>
+      </div>
+      <button type="button" class="admin-order-alert__btn" id="admin-order-alert-dismiss">Am văzut</button>
+    </div>
 
     <div class="admin-toast" id="admin-toast" hidden role="status" aria-live="assertive"></div>
 
@@ -137,7 +151,7 @@
       }
 
       function loadOrdersPanel() {
-        import("./admin-panel.js?v=7")
+        import("./admin-panel.js?v=8")
           .then(function (mod) {
             mod.startAdminPanel(function () {
               sessionStorage.removeItem(SESSION_KEY);
@@ -214,6 +228,12 @@
         sessionStorage.setItem(SESSION_KEY, "1");
         loginError.hidden = true;
         loginBtn.textContent = "OK!";
+        if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission();
+        }
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("./admin-sw.js").catch(function () {});
+        }
         showDashboard();
         loadOrdersPanel();
       }
