@@ -1,5 +1,11 @@
-import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=5";
-import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=5";
+import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=6";
+import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=6";
+import {
+  subscribeMenuPrices,
+  refreshMenuPrices,
+  applyMenuPricesToDocument,
+  buildEffectivePrices,
+} from "./menu-prices.js?v=6";
 
 const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",
@@ -13,7 +19,9 @@ const PRODUCT_KEY_BY_NAME = {
 };
 
 let unavailableIds = new Set();
+let menuPrices = buildEffectivePrices();
 let lastStockUpdatedAt = 0;
+let lastPricesUpdatedAt = 0;
 
 function applyMenuAvailability() {
   document.querySelectorAll(".menu-item").forEach((item) => {
@@ -45,7 +53,21 @@ function applyMenuAvailability() {
   });
 }
 
+function onMenuPricesUpdated(prices, updatedAt = Date.now()) {
+  if (updatedAt < lastPricesUpdatedAt) return;
+  if (updatedAt > 0) lastPricesUpdatedAt = updatedAt;
+  menuPrices = prices;
+  applyMenuPricesToDocument(menuPrices);
+  applyMenuAvailability();
+}
+
 function init() {
+  applyMenuPricesToDocument(menuPrices);
+
+  subscribeMenuPrices((prices, updatedAt) => {
+    onMenuPricesUpdated(prices, updatedAt);
+  });
+
   subscribeMenuAvailability((ids, updatedAt) => {
     if (updatedAt < lastStockUpdatedAt) return;
     lastStockUpdatedAt = updatedAt;
@@ -61,6 +83,9 @@ function init() {
         applyMenuAvailability();
       })
       .catch((err) => console.warn("refresh menu availability:", err));
+    refreshMenuPrices()
+      .then((prices) => onMenuPricesUpdated(prices))
+      .catch((err) => console.warn("refresh menu prices:", err));
   });
 }
 

@@ -312,6 +312,122 @@ body {
   cursor: wait;
 }
 
+.product-row__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.product-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.product-row__price-btn,
+.product-row__price {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.65rem 0.85rem;
+  white-space: nowrap;
+  min-width: 7.5rem;
+  text-align: center;
+}
+
+.product-row__price-btn {
+  background: var(--white);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.product-row__price-btn:hover {
+  border-color: var(--red);
+  color: var(--red-dark);
+}
+
+.product-row__price--auto {
+  background: #f3f4f6;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.product-row--editing-price {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.product-row__price-edit {
+  width: 100%;
+  margin-top: 0.65rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  background: #fff8f0;
+  border: 2px solid #f0dcc8;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.product-row__price-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.product-row__price-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.product-row__price-input {
+  font: inherit;
+  font-weight: 700;
+  padding: 0.65rem 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  max-width: 8rem;
+}
+
+.product-row__price-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.product-row__price-save,
+.product-row__price-cancel {
+  border: none;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.6rem 0.85rem;
+  cursor: pointer;
+}
+
+.product-row__price-save {
+  background: var(--red);
+  color: var(--white);
+}
+
+.product-row__price-cancel {
+  background: var(--white);
+  color: var(--text-muted);
+  border: 2px solid var(--border);
+}
+
 .products-empty {
   padding: 1rem;
   text-align: center;

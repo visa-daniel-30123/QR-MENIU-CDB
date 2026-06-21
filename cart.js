@@ -4,10 +4,17 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db, isFirebaseConfigured } from "./firebase-app.js";
-import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=4";
-import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=4";
+import { getMenuId, isMenuIdUnavailable, CARTOFI_MENU_ID } from "./menu-catalog.js?v=6";
+import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=6";
+import {
+  subscribeMenuPrices,
+  refreshMenuPrices,
+  getEffectivePrice,
+  applyMenuPricesToDocument,
+  buildEffectivePrices,
+} from "./menu-prices.js?v=6";
 
-const FRIES_PRICE = 10;
+let FRIES_PRICE = 10;
 const BREAD_PRICE = 1;
 const MAX_SAUCES = 2;
 const TABLE_COUNT = 6;
@@ -38,6 +45,8 @@ let editingCartId = null;
 let cartExpanded = false;
 let qrTableNumber = null;
 let unavailableIds = new Set();
+let menuPrices = buildEffectivePrices();
+let lastPricesUpdatedAt = 0;
 
 const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",
@@ -90,14 +99,17 @@ function slugify(text) {
 }
 
 const DRINK_RECOMMENDATIONS = [
-  { name: "Apă plată", detail: "0,5 L", price: 8 },
-  { name: "Coca Cola", detail: "0,5 L", price: 12 },
-  { name: "Schweppes Bitter Lemon", detail: "0,3 L", price: 12 },
+  { name: "Apă plată", detail: "0,5 L" },
+  { name: "Coca Cola", detail: "0,5 L" },
+  { name: "Schweppes Bitter Lemon", detail: "0,3 L" },
 ].map((drink) => ({
   ...drink,
   menuId: getMenuId(null, drink.name, drink.detail),
   id: slugify(`${drink.name}-${drink.detail}`),
   menuCategory: "bauturi",
+  get price() {
+    return getEffectivePrice(this.menuId, menuPrices) ?? 0;
+  },
 }));
 
 function parsePrice(text) {
@@ -935,6 +947,33 @@ function confirmOptions() {
   closeOptionsModal();
 }
 
+function syncGrillPrices() {
+  if (menuPrices.mici != null) {
+    PRODUCT_OPTIONS.mici.unitPrice = menuPrices.mici;
+    PLATE_GRILL.mici.unitPrice = menuPrices.mici;
+  }
+  if (menuPrices.carnaciori != null) {
+    PRODUCT_OPTIONS.carnaciori.unitPrice = menuPrices.carnaciori;
+    PLATE_GRILL.carnaciori.unitPrice = menuPrices.carnaciori;
+  }
+  if (menuPrices.ceafa != null) {
+    PRODUCT_OPTIONS.ceafa.unitPrice = menuPrices.ceafa;
+    PLATE_GRILL.ceafa.unitPrice = menuPrices.ceafa;
+  }
+  if (menuPrices[CARTOFI_MENU_ID] != null) {
+    FRIES_PRICE = menuPrices[CARTOFI_MENU_ID];
+  }
+}
+
+function onMenuPricesUpdated(prices, updatedAt = Date.now()) {
+  if (updatedAt < lastPricesUpdatedAt) return;
+  if (updatedAt > 0) lastPricesUpdatedAt = updatedAt;
+  menuPrices = prices;
+  syncGrillPrices();
+  applyMenuPricesToDocument(menuPrices);
+  applyMenuAvailability();
+}
+
 function initMenuButtons() {
   document.querySelectorAll(".menu-item").forEach((item) => {
     const nameEl = item.querySelector(".menu-item__name");
@@ -945,7 +984,7 @@ function initMenuButtons() {
 
     const name = nameEl.textContent.trim();
     const detail = detailEl ? detailEl.textContent.trim() : "";
-    const price = parsePrice(priceEl.textContent);
+    const price = getEffectivePrice(menuId, menuPrices) ?? parsePrice(priceEl.textContent);
     const productKey =
       item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[name] || "";
     const menuId = getMenuId(productKey, name, detail);
@@ -1080,7 +1119,11 @@ async function submitOrder(event) {
 
 function init() {
   initTableFromQr();
+  syncGrillPrices();
   initMenuButtons();
+  subscribeMenuPrices((prices, updatedAt) => {
+    onMenuPricesUpdated(prices, updatedAt);
+  });
   subscribeMenuAvailability((ids) => {
     unavailableIds = ids;
     applyMenuAvailability();
@@ -1094,6 +1137,9 @@ function init() {
         applyMenuAvailability();
       })
       .catch((err) => console.warn("refresh menu availability:", err));
+    refreshMenuPrices()
+      .then((prices) => onMenuPricesUpdated(prices))
+      .catch((err) => console.warn("refresh menu prices:", err));
   });
 
   renderCart();

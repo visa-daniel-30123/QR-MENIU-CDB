@@ -12,57 +12,61 @@ export function getMenuId(productKey, name, detail) {
   return slugify(`${name}-${detail || ""}`);
 }
 
+export const GRILL_PLATE_UNIT_IDS = ["mici", "carnaciori", "ceafa"];
+
 const MENU_ITEMS_RAW = [
-  { productKey: "hot-dog", name: "Hot Dog", detail: "100 gr", category: "Preparate calde" },
-  { productKey: "meniu-aripioare", name: "Meniu Aripioare", detail: "Aripioare / cartofi / sos", category: "Preparate calde" },
-  { productKey: "meniu-crispy", name: "Meniu Crispy", detail: "Crispy / cartofi / sos", category: "Preparate calde" },
-  { productKey: "meniu-cascaval", name: "Meniu Cașcaval Pane", detail: "Cașcaval pane / cartofi / sos", category: "Preparate calde" },
-  { name: "Cartofi prăjiți", detail: "200 gr", category: "Preparate calde" },
-  { productKey: "mici", name: "Mici", detail: "70 gr", category: "Preparate la grătar" },
-  { productKey: "ceafa", name: "Ceafă", detail: "200 gr", category: "Preparate la grătar" },
-  { productKey: "carnaciori", name: "Cârnăciori", detail: "50 gr", category: "Preparate la grătar" },
+  { productKey: "hot-dog", name: "Hot Dog", detail: "100 gr", category: "Preparate calde", price: 10 },
+  { productKey: "meniu-aripioare", name: "Meniu Aripioare", detail: "Aripioare / cartofi / sos", category: "Preparate calde", price: 32 },
+  { productKey: "meniu-crispy", name: "Meniu Crispy", detail: "Crispy / cartofi / sos", category: "Preparate calde", price: 35 },
+  { productKey: "meniu-cascaval", name: "Meniu Cașcaval Pane", detail: "Cașcaval pane / cartofi / sos", category: "Preparate calde", price: 32 },
+  { name: "Cartofi prăjiți", detail: "200 gr", category: "Preparate calde", price: 10 },
+  { productKey: "mici", name: "Mici", detail: "70 gr", category: "Preparate la grătar", price: 7 },
+  { productKey: "ceafa", name: "Ceafă", detail: "200 gr", category: "Preparate la grătar", price: 20 },
+  { productKey: "carnaciori", name: "Cârnăciori", detail: "50 gr", category: "Preparate la grătar", price: 6 },
   {
     productKey: "farfurie-gratar",
     name: "Farfurie la grătar",
     detail: "Mici / cârnăciori / ceafă la alegere",
     category: "Preparate la grătar",
+    priceFromGrillMin: true,
   },
-  { name: "Chiflă / pâine", detail: "50 gr", category: "Preparate la grătar" },
-  { name: "Kürtős Kalács", detail: "400 gr", category: "Dulciuri" },
-  { name: "Kürtős cu înghețată", detail: "250 gr", category: "Dulciuri" },
-  { name: "Înghețată", detail: "50 gr", category: "Dulciuri" },
-  { name: "Gogoși tradiționale", detail: "3 buc. · 100 gr", category: "Dulciuri" },
-  { name: "Cafea Julius Meinl", detail: "100 ml", category: "Băuturi calde" },
-  { name: "Ceai", detail: "300 ml", category: "Băuturi calde" },
-  { name: "Ciocolată caldă", detail: "200 ml", category: "Băuturi calde" },
-  { name: "Vin fiert", detail: "200 ml", category: "Băuturi calde" },
-  { name: "Coca Cola", detail: "0,5 L", category: "Sucuri" },
-  { name: "Coca Zero", detail: "0,5 L", category: "Sucuri" },
-  { name: "Fanta Orange", detail: "0,5 L", category: "Sucuri" },
-  { name: "Sprite", detail: "0,5 L", category: "Sucuri" },
-  { name: "Fuze Tea", detail: "0,5 L", category: "Sucuri" },
-  { name: "Limonadă", detail: "0,35 L", category: "Sucuri" },
-  { name: "Granini", detail: "0,3 L", category: "Sucuri" },
-  { name: "Schweppes Bitter Lemon", detail: "0,3 L", category: "Sucuri" },
-  { name: "Schweppes Mandarin", detail: "0,3 L", category: "Sucuri" },
-  { name: "Monster", detail: "0,5 L", category: "Energizante" },
-  { name: "Red Bull", detail: "0,25 L", category: "Energizante" },
-  { name: "Apă plată", detail: "0,5 L", category: "Apă" },
-  { name: "Apă minerală", detail: "0,5 L", category: "Apă" },
-  { name: "Apă Tușnad", detail: "1 L", category: "Apă" },
-  { name: "Apă Tușnad", detail: "2 L", category: "Apă" },
-  { name: "Bergenbier", detail: "0,33 L", category: "Bere" },
-  { name: "Bergenbier", detail: "0,5 L", category: "Bere" },
-  { name: "Beck's", detail: "0,33 L", category: "Bere" },
-  { name: "Beck's", detail: "0,5 L", category: "Bere" },
-  { name: "Stella", detail: "0,33 L", category: "Bere" },
-  { name: "Stella NA", detail: "0,33 L", category: "Bere fără alcool" },
-  { name: "Ursus Cooler", detail: "0,5 L", category: "Bere fără alcool" },
-  { name: "Bergenbier Fresh Lămâie", detail: "0,5 L", category: "Bere fără alcool" },
-  { name: "Bergenbier Grapefruit NA", detail: "0,5 L", category: "Bere fără alcool" },
+  { name: "Chiflă / pâine", detail: "50 gr", category: "Preparate la grătar", price: 1 },
+  { name: "Kürtős Kalács", detail: "400 gr", category: "Dulciuri", price: 20 },
+  { name: "Kürtős cu înghețată", detail: "250 gr", category: "Dulciuri", price: 20 },
+  { name: "Înghețată", detail: "50 gr", category: "Dulciuri", price: 5 },
+  { name: "Gogoși tradiționale", detail: "3 buc. · 100 gr", category: "Dulciuri", price: 10 },
+  { name: "Cafea Julius Meinl", detail: "100 ml", category: "Băuturi calde", price: 12 },
+  { name: "Ceai", detail: "300 ml", category: "Băuturi calde", price: 4 },
+  { name: "Ciocolată caldă", detail: "200 ml", category: "Băuturi calde", price: 6 },
+  { name: "Vin fiert", detail: "200 ml", category: "Băuturi calde", price: 6 },
+  { name: "Coca Cola", detail: "0,5 L", category: "Sucuri", price: 12 },
+  { name: "Coca Zero", detail: "0,5 L", category: "Sucuri", price: 12 },
+  { name: "Fanta Orange", detail: "0,5 L", category: "Sucuri", price: 12 },
+  { name: "Sprite", detail: "0,5 L", category: "Sucuri", price: 12 },
+  { name: "Fuze Tea", detail: "0,5 L", category: "Sucuri", price: 10 },
+  { name: "Limonadă", detail: "0,35 L", category: "Sucuri", price: 8 },
+  { name: "Granini", detail: "0,3 L", category: "Sucuri", price: 10 },
+  { name: "Schweppes Bitter Lemon", detail: "0,3 L", category: "Sucuri", price: 12 },
+  { name: "Schweppes Mandarin", detail: "0,3 L", category: "Sucuri", price: 12 },
+  { name: "Monster", detail: "0,5 L", category: "Energizante", price: 12 },
+  { name: "Red Bull", detail: "0,25 L", category: "Energizante", price: 10 },
+  { name: "Apă plată", detail: "0,5 L", category: "Apă", price: 8 },
+  { name: "Apă minerală", detail: "0,5 L", category: "Apă", price: 8 },
+  { name: "Apă Tușnad", detail: "1 L", category: "Apă", price: 12 },
+  { name: "Apă Tușnad", detail: "2 L", category: "Apă", price: 15 },
+  { name: "Bergenbier", detail: "0,33 L", category: "Bere", price: 11 },
+  { name: "Bergenbier", detail: "0,5 L", category: "Bere", price: 11 },
+  { name: "Beck's", detail: "0,33 L", category: "Bere", price: 12 },
+  { name: "Beck's", detail: "0,5 L", category: "Bere", price: 12 },
+  { name: "Stella", detail: "0,33 L", category: "Bere", price: 13 },
+  { name: "Stella NA", detail: "0,33 L", category: "Bere fără alcool", price: 13 },
+  { name: "Ursus Cooler", detail: "0,5 L", category: "Bere fără alcool", price: 7 },
+  { name: "Bergenbier Fresh Lămâie", detail: "0,5 L", category: "Bere fără alcool", price: 7 },
+  { name: "Bergenbier Grapefruit NA", detail: "0,5 L", category: "Bere fără alcool", price: 7 },
 ];
 
 const MENU_ID_INDEX = buildMenuIdIndex();
+const MENU_BY_ID = buildMenuById();
 
 function buildMenuIdIndex() {
   const aliasToCanonical = new Map();
@@ -77,12 +81,28 @@ function buildMenuIdIndex() {
     aliases.forEach((alias) => aliasToCanonical.set(alias, canonical));
   });
 
-  // ID-uri greșite salvate manual în Firebase
   aliasToCanonical.set("hot=dog", "hot-dog");
   aliasToCanonical.set("hot_dog", "hot-dog");
   aliasToCanonical.set("hotdog", "hot-dog");
 
   return { aliasToCanonical, canonicalToAliases };
+}
+
+function buildMenuById() {
+  const map = new Map();
+  MENU_ITEMS_RAW.forEach((item) => {
+    const id = getMenuId(item.productKey, item.name, item.detail);
+    map.set(id, {
+      id,
+      name: item.name,
+      detail: item.detail,
+      category: item.category,
+      defaultPrice: item.price ?? null,
+      priceFromGrillMin: Boolean(item.priceFromGrillMin),
+      productKey: item.productKey || "",
+    });
+  });
+  return map;
 }
 
 export function resolveCanonicalMenuId(id) {
@@ -93,6 +113,10 @@ export function resolveCanonicalMenuId(id) {
 
 export function getProductIdVariants(canonicalId) {
   return MENU_ID_INDEX.canonicalToAliases.get(canonicalId) || new Set([canonicalId]);
+}
+
+export function getMenuItemMeta(menuId) {
+  return MENU_BY_ID.get(resolveCanonicalMenuId(menuId)) || null;
 }
 
 export function normalizeUnavailableIds(ids) {
@@ -107,9 +131,38 @@ export function isMenuIdUnavailable(menuId, unavailableIds) {
   return unavailableIds.has(resolveCanonicalMenuId(menuId));
 }
 
-export const MENU_PRODUCTS = MENU_ITEMS_RAW.map((item) => ({
-  id: getMenuId(item.productKey, item.name, item.detail),
-  name: item.name,
-  detail: item.detail,
-  category: item.category,
-}));
+export function formatMenuPriceLabel(price, meta) {
+  if (meta?.priceFromGrillMin) {
+    return `de la ${price} lei`;
+  }
+  if (price === 1) return "1 leu";
+  return `${price} lei`;
+}
+
+export function getFarfurieFromPrice(pricesMap) {
+  const values = GRILL_PLATE_UNIT_IDS.map((id) => pricesMap[id]).filter(
+    (value) => typeof value === "number"
+  );
+  return values.length ? Math.min(...values) : null;
+}
+
+export const DEFAULT_MENU_PRICES = Object.fromEntries(
+  MENU_ITEMS_RAW.filter((item) => item.price != null).map((item) => [
+    getMenuId(item.productKey, item.name, item.detail),
+    item.price,
+  ])
+);
+
+export const CARTOFI_MENU_ID = getMenuId(null, "Cartofi prăjiți", "200 gr");
+
+export const MENU_PRODUCTS = MENU_ITEMS_RAW.map((item) => {
+  const id = getMenuId(item.productKey, item.name, item.detail);
+  return {
+    id,
+    name: item.name,
+    detail: item.detail,
+    category: item.category,
+    defaultPrice: item.price ?? getFarfurieFromPrice(DEFAULT_MENU_PRICES),
+    priceFromGrillMin: Boolean(item.priceFromGrillMin),
+  };
+});
