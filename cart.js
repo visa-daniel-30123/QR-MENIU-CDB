@@ -974,6 +974,14 @@ function onMenuPricesUpdated(prices, updatedAt = Date.now()) {
   applyMenuAvailability();
 }
 
+function getMenuItemLivePrice(item, menuId, priceEl) {
+  return (
+    getEffectivePrice(menuId, menuPrices) ??
+    Number(item.dataset.menuPrice) ??
+    parsePrice(priceEl?.textContent || "")
+  );
+}
+
 function initMenuButtons() {
   document.querySelectorAll(".menu-item").forEach((item) => {
     const nameEl = item.querySelector(".menu-item__name");
@@ -987,7 +995,6 @@ function initMenuButtons() {
     const productKey =
       item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[name] || "";
     const menuId = getMenuId(productKey, name, detail);
-    const price = getEffectivePrice(menuId, menuPrices) ?? parsePrice(priceEl.textContent);
     const id = slugify(`${name}-${detail}`);
     const menuCategory = item.closest(".category")?.dataset.category || "";
 
@@ -1001,6 +1008,8 @@ function initMenuButtons() {
     btn.addEventListener("click", (event) => {
       event.stopPropagation();
       if (isMenuIdUnavailable(menuId, unavailableIds)) return;
+
+      const price = getMenuItemLivePrice(item, menuId, priceEl);
 
       if (productKey && PRODUCT_OPTIONS[productKey]) {
         openOptionsModal(productKey, { id, name, detail, price, productKey, menuId, menuCategory });
