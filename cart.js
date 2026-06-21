@@ -984,10 +984,10 @@ function initMenuButtons() {
 
     const name = nameEl.textContent.trim();
     const detail = detailEl ? detailEl.textContent.trim() : "";
-    const price = getEffectivePrice(menuId, menuPrices) ?? parsePrice(priceEl.textContent);
     const productKey =
       item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[name] || "";
     const menuId = getMenuId(productKey, name, detail);
+    const price = getEffectivePrice(menuId, menuPrices) ?? parsePrice(priceEl.textContent);
     const id = slugify(`${name}-${detail}`);
     const menuCategory = item.closest(".category")?.dataset.category || "";
 
