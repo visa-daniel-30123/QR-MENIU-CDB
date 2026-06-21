@@ -7,7 +7,7 @@ import { db, isFirebaseConfigured } from "./firebase-app.js";
 import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=4";
 import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=4";
 
-const FRIES_PRICE = 6;
+const FRIES_PRICE = 10;
 const BREAD_PRICE = 1;
 const MAX_SAUCES = 2;
 const TABLE_COUNT = 6;
@@ -18,15 +18,15 @@ const PRODUCT_OPTIONS = {
   "meniu-crispy": { type: "sauce" },
   "meniu-cascaval": { type: "sauce" },
   "hot-dog": { type: "sauces" },
-  mici: { type: "grill", unitPrice: 5, pieceLabel: "mici" },
+  mici: { type: "grill", unitPrice: 7, pieceLabel: "mici" },
   ceafa: { type: "grill", unitPrice: 20, pieceLabel: "porții" },
-  carnaciori: { type: "grill", unitPrice: 5, pieceLabel: "cârnăciori" },
+  carnaciori: { type: "grill", unitPrice: 6, pieceLabel: "cârnăciori" },
   "farfurie-gratar": { type: "plate" },
 };
 
 const PLATE_GRILL = {
-  mici: { label: "Mici", unitPrice: 5, unit: "mici" },
-  carnaciori: { label: "Cârnăciori", unitPrice: 5, unit: "cârnăciori" },
+  mici: { label: "Mici", unitPrice: 7, unit: "mici" },
+  carnaciori: { label: "Cârnăciori", unitPrice: 6, unit: "cârnăciori" },
   ceafa: { label: "Ceafă", unitPrice: 20, unit: "ceafă" },
 };
 
@@ -90,8 +90,8 @@ function slugify(text) {
 }
 
 const DRINK_RECOMMENDATIONS = [
-  { name: "Apă plată", detail: "0,5 L", price: 5 },
-  { name: "Coca Cola", detail: "0,5 L", price: 6 },
+  { name: "Apă plată", detail: "0,5 L", price: 8 },
+  { name: "Coca Cola", detail: "0,5 L", price: 12 },
   { name: "Schweppes Bitter Lemon", detail: "0,3 L", price: 12 },
 ].map((drink) => ({
   ...drink,
