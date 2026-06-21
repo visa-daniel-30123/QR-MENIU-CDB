@@ -9,9 +9,10 @@ permissions:
   pages: write
   id-token: write
 
+# Așteaptă deploy-ul anterior; nu anulează (evită eroarea "in progress deployment")
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
