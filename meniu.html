@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Meniul terasei Casuta dintre brazi — preparate calde, dulciuri și băuturi.">
+  <meta name="description" content="Meniul Casuta dintre brazi — doar vizualizare, fără comandă online.">
   <title>Casuta dintre brazi — Meniu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,14 +11,13 @@
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="LOGO CDB.jpg" type="image/jpeg">
 </head>
-<body>
+<body class="menu-view">
   <header class="header">
     <div class="header__inner">
       <img src="LOGO CDB.jpg" alt="Casuta dintre brazi" class="header__logo" width="120" height="120">
       <div class="header__text">
         <h1 class="header__title">Casuta dintre brazi</h1>
-        <p class="header__subtitle">Terasă &amp; meniu</p>
-        <p class="header__table" id="header-table-badge" hidden></p>
+        <p class="header__subtitle">Scanează și vezi meniul</p>
       </div>
     </div>
   </header>
@@ -29,22 +28,6 @@
     <button class="nav__btn" data-category="dulciuri">Dulciuri</button>
     <button class="nav__btn" data-category="bauturi">Băuturi</button>
   </nav>
-
-  <aside class="cart-top" id="cart-top" aria-label="Coșul tău">
-    <div class="cart-top__row">
-      <button type="button" class="cart-top__toggle" id="cart-toggle" aria-expanded="false">
-        <span class="cart-top__label">🛒 Coș</span>
-        <span class="cart-top__summary" id="cart-summary">0 produse · 0 lei</span>
-        <span class="cart-top__chevron" aria-hidden="true">▼</span>
-      </button>
-      <button type="button" class="cart-top__checkout" id="cart-checkout-open" disabled>
-        Finalizează
-      </button>
-    </div>
-    <div class="cart-top__body" id="cart-top-body" hidden>
-      <div class="cart-top__list" id="cart-list"></div>
-    </div>
-  </aside>
 
   <main class="main">
     <section class="category" data-category="mancare">
@@ -552,73 +535,6 @@
     <p class="footer__note">Prețurile sunt exprimate în lei (RON)</p>
   </footer>
 
-  <div class="options-backdrop" id="options-backdrop" hidden></div>
-
-  <dialog class="options-modal" id="options-modal" aria-labelledby="options-title">
-    <header class="options-modal__header">
-      <h2 class="options-modal__title" id="options-title">Personalizează</h2>
-      <button type="button" class="options-modal__close" id="options-close" aria-label="Închide">×</button>
-    </header>
-    <div class="options-modal__body" id="options-body"></div>
-    <p class="options-modal__error" id="options-error" hidden></p>
-    <footer class="options-modal__footer">
-      <span class="options-modal__price" id="options-price"></span>
-      <div class="options-modal__actions">
-        <button type="button" class="options-modal__btn options-modal__btn--ghost" id="options-cancel">Anulează</button>
-        <button type="button" class="options-modal__btn options-modal__btn--primary" id="options-confirm">Adaugă în coș</button>
-      </div>
-    </footer>
-  </dialog>
-
-  <div class="drink-upsell-backdrop" id="drink-upsell-backdrop" hidden></div>
-
-  <dialog class="drink-upsell-modal" id="drink-upsell-modal" aria-labelledby="drink-upsell-title">
-    <header class="drink-upsell-modal__header">
-      <h2 class="drink-upsell-modal__title" id="drink-upsell-title">Ceva de băut?</h2>
-      <button type="button" class="drink-upsell-modal__close" id="drink-upsell-close" aria-label="Închide">×</button>
-    </header>
-    <div class="drink-upsell-modal__body">
-      <p class="drink-upsell-modal__hint">Ai comandat mâncare — poate vrei și ceva de băut?</p>
-      <div class="drink-upsell__list" id="drink-upsell-list"></div>
-    </div>
-    <footer class="drink-upsell-modal__footer">
-      <button type="button" class="drink-upsell-modal__btn drink-upsell-modal__btn--primary" id="drink-upsell-continue">Continuă la comandă</button>
-    </footer>
-  </dialog>
-
-  <div class="checkout-backdrop" id="checkout-backdrop" hidden></div>
-
-  <dialog class="checkout-modal" id="checkout-modal" aria-labelledby="checkout-title">
-    <header class="checkout-modal__header">
-      <h2 class="checkout-modal__title" id="checkout-title">Finalizează comanda</h2>
-      <button type="button" class="checkout-modal__close" id="checkout-close" aria-label="Închide">×</button>
-    </header>
-    <div class="checkout-modal__body">
-      <p class="checkout-modal__total">Total: <strong id="cart-total">0 lei</strong></p>
-      <p class="checkout-modal__success" id="cart-success" hidden>
-        Comanda a fost trimisă! O pregătim imediat.
-      </p>
-      <p class="checkout-modal__error" id="cart-error" hidden></p>
-      <p class="checkout-modal__table" id="table-badge" hidden></p>
-      <form class="cart-form" id="cart-form">
-        <label class="cart-form__label">
-          Nume
-          <input type="text" name="name" class="cart-form__input" required autocomplete="name" placeholder="Ex: Maria">
-        </label>
-        <label class="cart-form__label" id="checkout-table-label">
-          Nr. masă
-          <input type="text" name="table" class="cart-form__input" inputmode="numeric" placeholder="Ex: 5">
-        </label>
-        <label class="cart-form__label">
-          Observații (opțional)
-          <textarea name="notes" class="cart-form__input cart-form__textarea" rows="2" placeholder="Ex: fără muștar"></textarea>
-        </label>
-        <button type="submit" class="cart-form__submit" id="cart-submit">Trimite comanda</button>
-      </form>
-    </div>
-  </dialog>
-
   <script src="script.js"></script>
-  <script type="module" src="cart.js?v=4"></script>
 </body>
 </html>

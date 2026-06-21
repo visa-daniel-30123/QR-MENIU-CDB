@@ -92,7 +92,7 @@ function slugify(text) {
 const DRINK_RECOMMENDATIONS = [
   { name: "Apă plată", detail: "0,5 L", price: 5 },
   { name: "Coca Cola", detail: "0,5 L", price: 6 },
-  { name: "Schweppes", detail: "0,5 L", price: 6 },
+  { name: "Schweppes Bitter Lemon", detail: "0,3 L", price: 12 },
 ].map((drink) => ({
   ...drink,
   menuId: getMenuId(null, drink.name, drink.detail),

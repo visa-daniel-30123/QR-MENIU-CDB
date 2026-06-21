@@ -326,6 +326,19 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* Meniu doar vizualizare (fără comandă) */
+
+body.menu-view .menu-item__add {
+  display: none;
+}
+
+body.menu-view .cart-top,
+body.menu-view .options-modal,
+body.menu-view .checkout-modal,
+body.menu-view .drink-upsell-modal {
+  display: none !important;
+}
+
 /* Cart — bară sus + finalizare jos */
 
 .cart-top {
