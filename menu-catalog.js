@@ -101,7 +101,7 @@ function buildMenuById() {
     map.set(id, {
       id,
       name: item.name,
-      detail: item.detail,
+      detail: item.detail ?? "",
       category: item.category,
       defaultPrice: item.price ?? null,
       priceFromGrillMin: Boolean(item.priceFromGrillMin),
@@ -166,7 +166,7 @@ export const MENU_PRODUCTS = MENU_ITEMS_RAW.map((item) => {
   return {
     id,
     name: item.name,
-    detail: item.detail,
+    detail: item.detail ?? "",
     category: item.category,
     defaultPrice: item.price ?? getFarfurieFromPrice(DEFAULT_MENU_PRICES),
     priceFromGrillMin: Boolean(item.priceFromGrillMin),

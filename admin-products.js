@@ -2,7 +2,7 @@ import {
   MENU_PRODUCTS,
   isMenuIdUnavailable,
   getMenuItemMeta,
-} from "./menu-catalog.js?v=6";
+} from "./menu-catalog.js?v=7";
 import {
   subscribeMenuAvailability,
   toggleProductAvailability,
@@ -12,7 +12,7 @@ import {
   updateProductPrice,
   getEffectivePrice,
   buildEffectivePrices,
-} from "./menu-prices.js?v=6";
+} from "./menu-prices.js?v=7";
 
 let unavailableIds = new Set();
 let menuPrices = buildEffectivePrices();
@@ -49,7 +49,7 @@ function isPermissionError(err) {
 }
 
 function escapeHtml(text) {
-  return text
+  return String(text ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
