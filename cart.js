@@ -1078,16 +1078,9 @@ async function submitOrder(event) {
   els.error.hidden = true;
 
   const formData = new FormData(els.form);
-  const customerName = formData.get("name").toString().trim();
   const tableNumber = qrTableNumber || formData.get("table").toString().trim();
   const notes = formData.get("notes").toString().trim();
-
-  if (!customerName) {
-    els.error.textContent = "Te rugăm să introduci numele.";
-    els.error.hidden = false;
-    els.submit.disabled = false;
-    return;
-  }
+  const customerName = tableNumber ? `Masă ${tableNumber}` : "Client";
 
   const order = {
     customerName,
