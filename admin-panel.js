@@ -220,25 +220,6 @@ async function notifyNewOrder(order) {
   await showSystemNotification(order);
 }
 
-export async function testOrderNotification() {
-  unlockAudio();
-  await ensureServiceWorker();
-  if (canUseNotifications() && Notification.permission === "default") {
-    await requestNotifications();
-  }
-
-  const sample = {
-    id: "test",
-    customerName: "Test client",
-    tableNumber: "3",
-    total: 42,
-    items: [{ name: "Mici" }, { name: "Cola" }],
-  };
-
-  playNewOrderSound();
-  await notifyNewOrder(sample);
-}
-
 function showNewOrderToast(order) {
   const toast = document.getElementById("admin-toast");
   if (!toast) return;
@@ -292,7 +273,7 @@ function updateNotificationUi() {
   button.disabled = false;
   if (Notification.permission === "denied" && text) {
     text.textContent =
-      "Notificările sunt blocate. Permite notificări pentru acest site din setările browserului, apoi apasă Test.";
+      "Notificările sunt blocate. Permite notificări pentru acest site din setările browserului.";
   }
 }
 
@@ -311,14 +292,10 @@ export async function setupNotificationsOnLogin() {
 
 function initNotifications() {
   const button = document.getElementById("admin-notify-btn");
-  const testButton = document.getElementById("admin-notify-test");
   const dismissAlert = document.getElementById("admin-order-alert-dismiss");
 
   button?.addEventListener("click", () => {
     requestNotifications();
-  });
-  testButton?.addEventListener("click", () => {
-    testOrderNotification();
   });
   dismissAlert?.addEventListener("click", hidePersistentOrderAlert);
 
