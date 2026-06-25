@@ -65,21 +65,42 @@ function unlockAudio() {
   }
 }
 
+function playTone(ctx, frequency, startTime, duration, volume = 0.17) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "triangle";
+  osc.frequency.value = frequency;
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.03);
+  gain.gain.setValueAtTime(volume * 0.85, startTime + duration * 0.55);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.04);
+}
+
 function playNewOrderSound() {
   try {
     unlockAudio();
     const ctx = audioContext || new AudioContext();
     audioContext = ctx;
+    const t = ctx.currentTime;
 
-    [0, 0.25, 0.5].forEach((delay, index) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = index % 2 === 0 ? 880 : 1100;
-      gain.gain.value = 0.2;
-      osc.start(ctx.currentTime + delay);
-      osc.stop(ctx.currentTime + delay + 0.22);
+    const melody = [
+      { freq: 784, at: 0, dur: 0.5 },
+      { freq: 988, at: 0.55, dur: 0.5 },
+      { freq: 1175, at: 1.1, dur: 0.6 },
+      { freq: 1047, at: 1.8, dur: 0.45 },
+      { freq: 784, at: 2.35, dur: 0.45 },
+      { freq: 988, at: 2.85, dur: 0.45 },
+      { freq: 1319, at: 3.35, dur: 0.55 },
+      { freq: 1175, at: 4.0, dur: 0.5 },
+      { freq: 1568, at: 4.6, dur: 0.8 },
+    ];
+
+    melody.forEach(({ freq, at, dur }) => {
+      playTone(ctx, freq, t + at, dur);
     });
   } catch {
     /* optional */
@@ -89,7 +110,7 @@ function playNewOrderSound() {
 function vibrateNewOrder() {
   if (!("vibrate" in navigator)) return;
   try {
-    navigator.vibrate([180, 90, 180, 90, 320]);
+    navigator.vibrate([200, 100, 200, 100, 200, 100, 400]);
   } catch {
     /* optional */
   }
@@ -113,7 +134,7 @@ function buildNotificationOptions(order) {
     tag: `order-${order.id}`,
     renotify: true,
     requireInteraction: true,
-    vibrate: [180, 90, 180, 90, 320],
+    vibrate: [200, 100, 200, 100, 200, 100, 400],
     data: { url: "./admin.html" },
   };
 }
