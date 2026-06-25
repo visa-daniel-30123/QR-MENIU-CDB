@@ -42,6 +42,7 @@ const MENU_ITEMS_RAW = [
   { name: "Cornetto King", category: "Dulciuri", price: 18 },
   { name: "Gogoși tradiționale", detail: "3 buc. · 100 gr", category: "Dulciuri", price: 10 },
   { name: "Cafea Julius Meinl", detail: "100 ml", category: "Băuturi calde", price: 12 },
+  { name: "Cafea Frappé", detail: "350 ml", category: "Băuturi calde", price: 15 },
   { name: "Ceai", detail: "300 ml", category: "Băuturi calde", price: 4 },
   { name: "Ciocolată caldă", detail: "200 ml", category: "Băuturi calde", price: 6 },
   { name: "Vin fiert", detail: "200 ml", category: "Băuturi calde", price: 6 },
