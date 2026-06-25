@@ -276,6 +276,10 @@ body {
   flex-shrink: 0;
 }
 
+.menu-prices-pending .menu-item__price {
+  visibility: hidden;
+}
+
 .menu-item__add {
   flex-shrink: 0;
   width: 44px;

@@ -79,14 +79,30 @@ export function getEffectivePrice(menuId, pricesMap) {
 
 export function subscribeMenuPrices(callback, onError) {
   if (!db) {
-    callback(buildEffectivePrices(), 0);
+    callback(buildEffectivePrices(), 0, { fromCache: false });
     return () => {};
   }
+
+  let allowCache = false;
+  const cacheTimer = window.setTimeout(() => {
+    allowCache = true;
+  }, 4000);
 
   return onSnapshot(
     PRICES_REF,
     (snapshot) => {
-      callback(buildEffectivePrices(pricesFromSnapshot(snapshot)), updatedAtFromSnapshot(snapshot));
+      const fromCache = snapshot.metadata.fromCache;
+      if (fromCache && !allowCache) return;
+      if (!fromCache) {
+        allowCache = true;
+        window.clearTimeout(cacheTimer);
+      }
+
+      callback(
+        buildEffectivePrices(pricesFromSnapshot(snapshot)),
+        updatedAtFromSnapshot(snapshot),
+        { fromCache }
+      );
     },
     (error) => {
       console.error("menu prices subscribe error:", error);

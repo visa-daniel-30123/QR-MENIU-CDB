@@ -12,7 +12,7 @@ import {
   getEffectivePrice,
   applyMenuPricesToDocument,
   buildEffectivePrices,
-} from "./menu-prices.js?v=8";
+} from "./menu-prices.js?v=9";
 
 let FRIES_PRICE = 10;
 let BREAD_PRICE = 1;
@@ -49,6 +49,7 @@ let qrTableNumber = null;
 let unavailableIds = new Set();
 let menuPrices = buildEffectivePrices();
 let lastPricesUpdatedAt = 0;
+let menuPricesReady = false;
 
 const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",
@@ -1021,7 +1022,8 @@ function syncGrillPrices() {
   }
 }
 
-function onMenuPricesUpdated(prices, updatedAt = Date.now()) {
+function onMenuPricesUpdated(prices, updatedAt = Date.now(), meta = {}) {
+  if (meta.fromCache && menuPricesReady) return;
   if (updatedAt < lastPricesUpdatedAt) return;
   if (updatedAt > 0) lastPricesUpdatedAt = updatedAt;
   menuPrices = prices;
@@ -1175,12 +1177,23 @@ async function submitOrder(event) {
   }
 }
 
-function init() {
+async function init() {
   initTableFromQr();
-  syncGrillPrices();
+
+  try {
+    const prices = await refreshMenuPrices();
+    onMenuPricesUpdated(prices, Date.now(), { fromCache: false });
+  } catch (err) {
+    console.warn("initial menu prices:", err);
+    onMenuPricesUpdated(buildEffectivePrices(), 0, { fromCache: false });
+  }
+
+  menuPricesReady = true;
+  document.body.classList.remove("menu-prices-pending");
+
   initMenuButtons();
-  subscribeMenuPrices((prices, updatedAt) => {
-    onMenuPricesUpdated(prices, updatedAt);
+  subscribeMenuPrices((prices, updatedAt, meta) => {
+    onMenuPricesUpdated(prices, updatedAt, meta);
   });
   subscribeMenuAvailability((ids) => {
     unavailableIds = ids;
@@ -1196,7 +1209,7 @@ function init() {
       })
       .catch((err) => console.warn("refresh menu availability:", err));
     refreshMenuPrices()
-      .then((prices) => onMenuPricesUpdated(prices))
+      .then((prices) => onMenuPricesUpdated(prices, Date.now(), { fromCache: false }))
       .catch((err) => console.warn("refresh menu prices:", err));
   });
 

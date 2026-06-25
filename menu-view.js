@@ -5,7 +5,7 @@ import {
   refreshMenuPrices,
   applyMenuPricesToDocument,
   buildEffectivePrices,
-} from "./menu-prices.js?v=8";
+} from "./menu-prices.js?v=9";
 
 const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",
@@ -22,6 +22,7 @@ let unavailableIds = new Set();
 let menuPrices = buildEffectivePrices();
 let lastStockUpdatedAt = 0;
 let lastPricesUpdatedAt = 0;
+let menuPricesReady = false;
 
 function applyMenuAvailability() {
   document.querySelectorAll(".menu-item").forEach((item) => {
@@ -53,7 +54,8 @@ function applyMenuAvailability() {
   });
 }
 
-function onMenuPricesUpdated(prices, updatedAt = Date.now()) {
+function onMenuPricesUpdated(prices, updatedAt = Date.now(), meta = {}) {
+  if (meta.fromCache && menuPricesReady) return;
   if (updatedAt < lastPricesUpdatedAt) return;
   if (updatedAt > 0) lastPricesUpdatedAt = updatedAt;
   menuPrices = prices;
@@ -61,11 +63,20 @@ function onMenuPricesUpdated(prices, updatedAt = Date.now()) {
   applyMenuAvailability();
 }
 
-function init() {
-  applyMenuPricesToDocument(menuPrices);
+async function init() {
+  try {
+    const prices = await refreshMenuPrices();
+    onMenuPricesUpdated(prices, Date.now(), { fromCache: false });
+  } catch (err) {
+    console.warn("initial menu prices:", err);
+    onMenuPricesUpdated(buildEffectivePrices(), 0, { fromCache: false });
+  }
 
-  subscribeMenuPrices((prices, updatedAt) => {
-    onMenuPricesUpdated(prices, updatedAt);
+  menuPricesReady = true;
+  document.body.classList.remove("menu-prices-pending");
+
+  subscribeMenuPrices((prices, updatedAt, meta) => {
+    onMenuPricesUpdated(prices, updatedAt, meta);
   });
 
   subscribeMenuAvailability((ids, updatedAt) => {
@@ -84,7 +95,7 @@ function init() {
       })
       .catch((err) => console.warn("refresh menu availability:", err));
     refreshMenuPrices()
-      .then((prices) => onMenuPricesUpdated(prices))
+      .then((prices) => onMenuPricesUpdated(prices, Date.now(), { fromCache: false }))
       .catch((err) => console.warn("refresh menu prices:", err));
   });
 }

@@ -12,7 +12,7 @@ import {
   updateProductPrice,
   getEffectivePrice,
   buildEffectivePrices,
-} from "./menu-prices.js?v=8";
+} from "./menu-prices.js?v=9";
 
 let unavailableIds = new Set();
 let menuPrices = buildEffectivePrices();
