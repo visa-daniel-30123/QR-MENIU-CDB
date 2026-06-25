@@ -150,7 +150,7 @@
       }
 
       function loadOrdersPanel() {
-        import("./admin-panel.js?v=8")
+        import("./admin-panel.js?v=9")
           .then(function (mod) {
             mod.startAdminPanel(function () {
               sessionStorage.removeItem(SESSION_KEY);
@@ -163,7 +163,7 @@
             showError("Ești logat, dar comenzile nu se încarcă. Verifică Firebase și internetul.");
           });
 
-        import("./admin-products.js?v=7")
+        import("./admin-products.js?v=8")
           .then(function (mod) {
             mod.startProductsPanel();
           })

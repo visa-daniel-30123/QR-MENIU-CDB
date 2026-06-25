@@ -564,6 +564,11 @@ body {
   animation: orderAlertPulse 1.2s ease infinite;
 }
 
+.admin-order-alert[hidden] {
+  display: none !important;
+  animation: none;
+}
+
 .admin-order-alert__title {
   display: block;
   font-size: 1.05rem;

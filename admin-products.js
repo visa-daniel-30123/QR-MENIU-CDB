@@ -2,17 +2,17 @@ import {
   MENU_PRODUCTS,
   isMenuIdUnavailable,
   getMenuItemMeta,
-} from "./menu-catalog.js?v=7";
+} from "./menu-catalog.js?v=8";
 import {
   subscribeMenuAvailability,
   toggleProductAvailability,
-} from "./menu-availability.js?v=6";
+} from "./menu-availability.js?v=8";
 import {
   subscribeMenuPrices,
   updateProductPrice,
   getEffectivePrice,
   buildEffectivePrices,
-} from "./menu-prices.js?v=7";
+} from "./menu-prices.js?v=8";
 
 let unavailableIds = new Set();
 let menuPrices = buildEffectivePrices();

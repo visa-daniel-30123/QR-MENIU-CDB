@@ -4,15 +4,15 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db, isFirebaseConfigured } from "./firebase-app.js";
-import { getMenuId, isMenuIdUnavailable, CARTOFI_MENU_ID } from "./menu-catalog.js?v=6";
-import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=6";
+import { getMenuId, isMenuIdUnavailable, CARTOFI_MENU_ID } from "./menu-catalog.js?v=8";
+import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=8";
 import {
   subscribeMenuPrices,
   refreshMenuPrices,
   getEffectivePrice,
   applyMenuPricesToDocument,
   buildEffectivePrices,
-} from "./menu-prices.js?v=6";
+} from "./menu-prices.js?v=8";
 
 let FRIES_PRICE = 10;
 const BREAD_PRICE = 1;
@@ -29,6 +29,8 @@ const PRODUCT_OPTIONS = {
   ceafa: { type: "grill", unitPrice: 20, pieceLabel: "porții" },
   carnaciori: { type: "grill", unitPrice: 6, pieceLabel: "cârnăciori" },
   "farfurie-gratar": { type: "plate" },
+  "espresso-ristretto": { type: "milk" },
+  "espresso-lungo": { type: "milk" },
 };
 
 const PLATE_GRILL = {
@@ -57,6 +59,8 @@ const PRODUCT_KEY_BY_NAME = {
   Ceafă: "ceafa",
   Cârnăciori: "carnaciori",
   "Farfurie la grătar": "farfurie-gratar",
+  "Julius Meinl Espresso Ristretto": "espresso-ristretto",
+  "Julius Meinl Espresso Lungo": "espresso-lungo",
 };
 
 const els = {
@@ -140,6 +144,10 @@ function cartTotal() {
 
 function parseOptionsFromDetail(detail, config) {
   if (!detail) return {};
+
+  if (config.type === "milk") {
+    return { withMilk: /cu lapte/i.test(detail) };
+  }
 
   if (config.type === "sauce" || config.type === "sauces") {
     const sauceMatch = detail.match(/Sos:\s*(.+?)(?:\s*·|$)/);
@@ -558,6 +566,20 @@ function renderSaucesOnlyOptions() {
   els.optionsPrice.textContent = `${pendingProduct.price} lei`;
 }
 
+function renderMilkOptions() {
+  const init = pendingProduct.editOptions || {};
+
+  els.optionsBody.innerHTML = `
+    <p class="options-modal__hint">Dorești lapte?</p>
+    <label class="options-check">
+      <input type="checkbox" id="espresso-milk" ${init.withMilk ? "checked" : ""}>
+      <span>Cu lapte</span>
+    </label>
+  `;
+
+  els.optionsPrice.textContent = `${pendingProduct.price} lei`;
+}
+
 function renderGrillOptions(config) {
   const init = pendingProduct.editOptions || {};
 
@@ -746,6 +768,8 @@ function openOptionsModal(productKey, baseProduct) {
     renderSauceOptions();
   } else if (config.type === "sauces") {
     renderSaucesOnlyOptions();
+  } else if (config.type === "milk") {
+    renderMilkOptions();
   } else if (config.type === "plate") {
     renderPlateOptions();
   } else {
@@ -765,7 +789,9 @@ function openEditModal(item) {
   pendingProduct = {
     name: item.name,
     price: item.price,
+    detail: item.detail,
     productKey,
+    menuId: item.menuId,
     menuCategory: item.menuCategory,
     editOptions: item.options || parseOptionsFromDetail(item.detail, config),
   };
@@ -777,6 +803,8 @@ function openEditModal(item) {
     renderSauceOptions();
   } else if (config.type === "sauces") {
     renderSaucesOnlyOptions();
+  } else if (config.type === "milk") {
+    renderMilkOptions();
   } else if (config.type === "plate") {
     renderPlateOptions();
   } else {
@@ -859,6 +887,27 @@ function confirmOptions() {
       price: pendingProduct.price,
       linePrice: pendingProduct.price,
       productKey: pendingProduct.productKey,
+      options,
+      customizable: true,
+      menuCategory: pendingProduct.menuCategory,
+    });
+  } else if (config.type === "milk") {
+    const withMilk = Boolean(document.getElementById("espresso-milk")?.checked);
+    const baseDetail = pendingProduct.detail || "";
+    const detailParts = [baseDetail];
+    if (withMilk) detailParts.push("cu lapte");
+    const detail = detailParts.filter(Boolean).join(" · ");
+    const id = slugify(`${pendingProduct.name}-${baseDetail}-${withMilk ? "lapte" : "fara-lapte"}`);
+    const options = { withMilk };
+
+    finalizeCartProduct({
+      id,
+      name: pendingProduct.name,
+      detail,
+      price: pendingProduct.price,
+      linePrice: pendingProduct.price,
+      productKey: pendingProduct.productKey,
+      menuId: pendingProduct.menuId,
       options,
       customizable: true,
       menuCategory: pendingProduct.menuCategory,

@@ -1,11 +1,11 @@
-import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=6";
-import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=6";
+import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=8";
+import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=8";
 import {
   subscribeMenuPrices,
   refreshMenuPrices,
   applyMenuPricesToDocument,
   buildEffectivePrices,
-} from "./menu-prices.js?v=6";
+} from "./menu-prices.js?v=8";
 
 const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",

@@ -9,7 +9,7 @@ import {
   normalizeUnavailableIds,
   resolveCanonicalMenuId,
   getProductIdVariants,
-} from "./menu-catalog.js";
+} from "./menu-catalog.js?v=8";
 
 const MENU_STATE_REF = doc(db, "menu", "availability");
 const LEGACY_STATE_REF = doc(db, "settings", "menu");

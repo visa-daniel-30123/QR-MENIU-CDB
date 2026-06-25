@@ -23,7 +23,8 @@ const els = {
 
 let currentFilter = "active";
 let orders = [];
-let knownIds = new Set();
+let announcedOrderIds = new Set();
+let dismissedAlertOrderIds = new Set();
 let firstLoad = true;
 let started = false;
 let audioContext = null;
@@ -183,17 +184,26 @@ function stopTitleFlash() {
 function showPersistentOrderAlert(order) {
   const alert = document.getElementById("admin-order-alert");
   const text = document.getElementById("admin-order-alert-text");
-  if (!alert || !text) return;
+  if (!alert || !text || !order?.id) return;
+  if (dismissedAlertOrderIds.has(order.id)) return;
 
   const { body } = buildOrderNotificationContent(order);
   text.textContent = body;
+  alert.dataset.orderId = order.id;
   alert.hidden = false;
 }
 
 function hidePersistentOrderAlert() {
   const alert = document.getElementById("admin-order-alert");
-  if (alert) alert.hidden = true;
+  if (!alert) return;
+
+  const orderId = alert.dataset.orderId;
+  if (orderId) dismissedAlertOrderIds.add(orderId);
+
+  alert.hidden = true;
+  delete alert.dataset.orderId;
   stopTitleFlash();
+  if (!document.hidden) document.title = PAGE_TITLE;
 }
 
 function canUseNotifications() {
@@ -395,19 +405,23 @@ function listenOrders() {
     (snapshot) => {
       orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-      if (!firstLoad) {
+      if (firstLoad) {
+        snapshot.docs.forEach((docSnap) => {
+          announcedOrderIds.add(docSnap.id);
+        });
+      } else {
         snapshot.docChanges().forEach((change) => {
-          if (change.type === "added" && !knownIds.has(change.doc.id)) {
-            const data = change.doc.data();
-            if (data.status === "new") {
-              playNewOrderSound();
-              notifyNewOrder({ id: change.doc.id, ...data });
-            }
+          if (change.type !== "added" || announcedOrderIds.has(change.doc.id)) return;
+
+          const data = change.doc.data();
+          announcedOrderIds.add(change.doc.id);
+          if (data.status === "new") {
+            playNewOrderSound();
+            notifyNewOrder({ id: change.doc.id, ...data });
           }
         });
       }
 
-      knownIds = new Set(snapshot.docs.map((d) => d.id));
       firstLoad = false;
       updateStats();
       renderOrders();

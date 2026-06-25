@@ -13,7 +13,7 @@ import {
   getFarfurieFromPrice,
   getMenuItemMeta,
   getMenuId,
-} from "./menu-catalog.js";
+} from "./menu-catalog.js?v=8";
 
 const PRICES_REF = doc(db, "menu", "prices");
 
@@ -62,7 +62,19 @@ export function getEffectivePrice(menuId, pricesMap) {
   if (meta?.priceFromGrillMin) {
     return getFarfurieFromPrice(pricesMap);
   }
-  return pricesMap[canonical] ?? DEFAULT_MENU_PRICES[canonical] ?? null;
+  const fromMap = pricesMap[canonical];
+  if (typeof fromMap === "number" && Number.isFinite(fromMap)) {
+    return fromMap;
+  }
+  const fromDefaults = DEFAULT_MENU_PRICES[canonical];
+  if (typeof fromDefaults === "number" && Number.isFinite(fromDefaults)) {
+    return fromDefaults;
+  }
+  const fromMeta = meta?.defaultPrice;
+  if (typeof fromMeta === "number" && Number.isFinite(fromMeta)) {
+    return fromMeta;
+  }
+  return null;
 }
 
 export function subscribeMenuPrices(callback, onError) {
@@ -115,7 +127,7 @@ export async function updateProductPrice(menuId, newPrice) {
     prices: Object.fromEntries(
       MENU_PRODUCTS.filter((product) => !product.priceFromGrillMin).map((product) => [
         product.id,
-        effective[product.id],
+        getEffectivePrice(product.id, effective) ?? product.defaultPrice ?? 0,
       ])
     ),
     updatedAt: Date.now(),
