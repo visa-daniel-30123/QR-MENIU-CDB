@@ -87,6 +87,24 @@ body {
   margin-top: 0.2rem;
 }
 
+.header__location {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.header__location a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  opacity: 0.95;
+}
+
+.header__location a:hover {
+  opacity: 1;
+}
+
 .header__table {
   margin: 0.45rem 0 0;
   display: inline-block;
