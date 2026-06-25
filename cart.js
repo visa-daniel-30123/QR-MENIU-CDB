@@ -4,7 +4,7 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db, isFirebaseConfigured } from "./firebase-app.js";
-import { getMenuId, isMenuIdUnavailable, CARTOFI_MENU_ID } from "./menu-catalog.js?v=8";
+import { getMenuId, isMenuIdUnavailable, CARTOFI_MENU_ID, BREAD_MENU_ID, formatMenuPriceLabel } from "./menu-catalog.js?v=8";
 import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=8";
 import {
   subscribeMenuPrices,
@@ -15,7 +15,7 @@ import {
 } from "./menu-prices.js?v=8";
 
 let FRIES_PRICE = 10;
-const BREAD_PRICE = 1;
+let BREAD_PRICE = 1;
 const MAX_SAUCES = 2;
 const TABLE_COUNT = 6;
 const TABLE_STORAGE_KEY = "cdb-table-number";
@@ -92,6 +92,10 @@ const els = {
   drinkUpsellContinue: document.getElementById("drink-upsell-continue"),
   drinkUpsellClose: document.getElementById("drink-upsell-close"),
 };
+
+function addonPriceLabel(price) {
+  return `+${formatMenuPriceLabel(price)}`;
+}
 
 function slugify(text) {
   return text
@@ -529,7 +533,7 @@ function renderSauceOptions() {
     </fieldset>
     <label class="options-check">
       <input type="checkbox" id="menu-bread" ${init.withBread ? "checked" : ""}>
-      <span>Vrei și pâine? <strong>+${BREAD_PRICE} leu</strong></span>
+      <span>Vrei și pâine? <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
     </label>
   `;
 
@@ -597,7 +601,7 @@ function renderGrillOptions(config) {
     </label>
     <label class="options-check">
       <input type="checkbox" id="grill-bread" ${init.withBread ? "checked" : ""}>
-      <span>Vrei și pâine? <strong>+${BREAD_PRICE} leu</strong></span>
+      <span>Vrei și pâine? <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
     </label>
     <p class="options-modal__hint">Alege până la ${MAX_SAUCES} sosuri (opțional):</p>
     <fieldset class="options-group">
@@ -704,7 +708,7 @@ function renderPlateOptions() {
     </label>
     <label class="options-check">
       <input type="checkbox" id="plate-bread" ${init.withBread ? "checked" : ""}>
-      <span>Pâine <strong>+${BREAD_PRICE} leu</strong></span>
+      <span>Pâine <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
     </label>
     <p class="options-modal__hint">Alege până la ${MAX_SAUCES} sosuri (opțional):</p>
     <fieldset class="options-group">
@@ -1011,6 +1015,9 @@ function syncGrillPrices() {
   }
   if (menuPrices[CARTOFI_MENU_ID] != null) {
     FRIES_PRICE = menuPrices[CARTOFI_MENU_ID];
+  }
+  if (menuPrices[BREAD_MENU_ID] != null) {
+    BREAD_PRICE = menuPrices[BREAD_MENU_ID];
   }
 }
 

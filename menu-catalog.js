@@ -166,6 +166,7 @@ export const DEFAULT_MENU_PRICES = Object.fromEntries(
 );
 
 export const CARTOFI_MENU_ID = getMenuId(null, "Cartofi prăjiți", "200 gr");
+export const BREAD_MENU_ID = getMenuId(null, "Chiflă / pâine", "50 gr");
 
 export const MENU_PRODUCTS = MENU_ITEMS_RAW.map((item) => {
   const id = getMenuId(item.productKey, item.name, item.detail);
