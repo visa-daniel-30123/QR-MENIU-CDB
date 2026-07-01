@@ -22,8 +22,14 @@
           <a href="https://maps.app.goo.gl/9gvDvL2cosEKZXov8?g_st=iw" target="_blank" rel="noopener noreferrer" data-i18n="header.location">Porumbacu de Sus · zonă turistică</a>
         </p>
         <div class="lang-switch" id="lang-switch" role="group" data-i18n-aria="lang.label" aria-label="Limba">
-          <button type="button" class="lang-switch__btn lang-switch__btn--active" data-lang="ro">RO</button>
-          <button type="button" class="lang-switch__btn" data-lang="en">EN</button>
+          <button type="button" class="lang-switch__btn lang-switch__btn--ro lang-switch__btn--active" data-lang="ro" aria-label="Română">
+            <img class="lang-switch__flag" src="ro flag.png" alt="" width="54" height="32" decoding="async">
+            <span class="lang-switch__code">RO</span>
+          </button>
+          <button type="button" class="lang-switch__btn lang-switch__btn--en" data-lang="en" aria-label="English">
+            <img class="lang-switch__flag" src="en flag.jpg" alt="" width="54" height="32" decoding="async">
+            <span class="lang-switch__code">EN</span>
+          </button>
         </div>
         <p class="header__table" id="header-table-badge" hidden></p>
       </div>
@@ -124,7 +130,7 @@
           <div class="menu-item__content">
             <div class="menu-item__info">
               <span class="menu-item__name">Mici</span>
-              <span class="menu-item__detail">70 gr</span>
+              <span class="menu-item__detail">70 gr · pe bucată</span>
             </div>
             <span class="menu-item__price">7 lei</span>
           </div>
@@ -144,7 +150,7 @@
           <div class="menu-item__content">
             <div class="menu-item__info">
               <span class="menu-item__name">Cârnăciori</span>
-              <span class="menu-item__detail">50 gr</span>
+              <span class="menu-item__detail">50 gr · pe bucată</span>
             </div>
             <span class="menu-item__price">6 lei</span>
           </div>
@@ -733,6 +739,6 @@
   </dialog>
 
   <script src="script.js"></script>
-  <script type="module" src="cart.js?v=13"></script>
+  <script type="module" src="cart.js?v=14"></script>
 </body>
 </html>

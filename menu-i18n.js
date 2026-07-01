@@ -127,6 +127,24 @@ const CATEGORY_EN = {
   "bere-fara-alcool": "Non-alcoholic beer",
 };
 
+const CATEGORY_BY_RO_NAME = {
+  "Preparate calde": "preparate-calde",
+  "Preparate la grătar": "preparate-la-gratar",
+  Dulciuri: "dulciuri",
+  "Băuturi calde": "bauturi-calde",
+  Sucuri: "sucuri",
+  Energizante: "energizante",
+  Apă: "apa",
+  Bere: "bere",
+  "Bere fără alcool": "bere-fara-alcool",
+};
+
+export function getCategoryDisplayName(categoryName, lang = getLang()) {
+  if (lang !== "en") return categoryName;
+  const key = CATEGORY_BY_RO_NAME[categoryName];
+  return key ? CATEGORY_EN[key] || categoryName : categoryName;
+}
+
 const PRODUCT_EN = {
   "hot-dog": "Hot Dog",
   "meniu-aripioare": "Wings menu",
@@ -134,7 +152,10 @@ const PRODUCT_EN = {
   "meniu-cascaval": "Fried cheese menu",
   "cartofi-prajiti-200-gr": "French fries",
   "mici-70-gr": "Grilled minced rolls (mici)",
-  "ceafa-200-gr": "Pork neck steak",
+  mici: "Grilled minced rolls (mici)",
+  ceafa: "Pork neck",
+  "ceafa-200-gr": "Pork neck",
+  carnaciori: "Sausages",
   "carnaciori-50-gr": "Sausages",
   "farfurie-gratar": "Mixed grill plate",
   "chifla-paine-50-gr": "Bread roll",
@@ -188,6 +209,10 @@ const DETAIL_EN = {
   "meniu-aripioare": "Wings / fries / sauce — 200 g / 175 g / 25 g",
   "meniu-crispy": "Crispy / fries / sauce — 200 g / 175 g / 25 g",
   "meniu-cascaval": "Fried cheese / fries / sauce — 200 g / 175 g / 25 g",
+  mici: "70 g · per piece",
+  "mici-70-gr": "70 g · per piece",
+  carnaciori: "50 g · per piece",
+  "carnaciori-50-gr": "50 g · per piece",
   "farfurie-gratar": "Mici / sausages / pork neck — your choice",
   "gogosi-traditionale-3-buc-100-gr": "3 pcs · 100 g",
 };

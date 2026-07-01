@@ -4,16 +4,26 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db, isFirebaseConfigured } from "./firebase-app.js";
-import { getMenuId, isMenuIdUnavailable, CARTOFI_MENU_ID, BREAD_MENU_ID, formatMenuPriceLabel } from "./menu-catalog.js?v=8";
+import {
+  getMenuId,
+  isMenuIdUnavailable,
+  CARTOFI_MENU_ID,
+  BREAD_MENU_ID,
+  formatMenuPriceLabel,
+  MENU_PRODUCTS,
+  getMenuItemMeta,
+} from "./menu-catalog.js?v=8";
 import {
   t,
   getLang,
   getProductDisplayName,
+  getDetailDisplayName,
+  getCategoryDisplayName,
   getRomanianProductName,
   applyMenuLanguage,
   initLangSwitcher,
   onLangChange,
-} from "./menu-i18n.js?v=1";
+} from "./menu-i18n.js?v=4";
 import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=8";
 import {
   subscribeMenuPrices,
@@ -59,6 +69,16 @@ let unavailableIds = new Set();
 let menuPrices = buildEffectivePrices();
 let lastPricesUpdatedAt = 0;
 let menuPricesReady = false;
+let reopenDrinkUpsellAfterOptions = false;
+
+const DRINK_UPSELL_CATEGORIES = [
+  "Băuturi calde",
+  "Sucuri",
+  "Energizante",
+  "Apă",
+  "Bere",
+  "Bere fără alcool",
+];
 
 const PRODUCT_KEY_BY_NAME = {
   "Meniu Aripioare": "meniu-aripioare",
@@ -116,19 +136,47 @@ function slugify(text) {
     .replace(/^-|-$/g, "");
 }
 
-const DRINK_RECOMMENDATIONS = [
-  { name: "Apă plată", detail: "0,5 L" },
-  { name: "Coca Cola", detail: "0,5 L" },
-  { name: "Schweppes Bitter Lemon", detail: "0,5 L" },
-].map((drink) => ({
-  ...drink,
-  menuId: getMenuId(null, drink.name, drink.detail),
-  id: slugify(`${drink.name}-${drink.detail}`),
-  menuCategory: "bauturi",
-  get price() {
-    return getEffectivePrice(this.menuId, menuPrices) ?? 0;
-  },
-}));
+function getProductKeyForMenuProduct(product) {
+  const meta = getMenuItemMeta(product.id);
+  if (meta?.productKey) return meta.productKey;
+  return PRODUCT_KEY_BY_NAME[product.name] || "";
+}
+
+function buildDrinkUpsellProduct(product) {
+  const productKey = getProductKeyForMenuProduct(product);
+  const price = getEffectivePrice(product.id, menuPrices);
+  const meta = getMenuItemMeta(product.id);
+  const nameRo = product.name;
+  const detailRo = product.detail;
+  return {
+    menuId: product.id,
+    id: slugify(`${nameRo}-${detailRo}`),
+    nameRo,
+    detail: detailRo,
+    price: price ?? 0,
+    priceLabel: price != null ? formatMenuPriceLabel(price, meta) : "—",
+    productKey,
+    menuCategory: "bauturi",
+  };
+}
+
+function getDrinkUpsellGroups() {
+  const byCategory = new Map();
+  MENU_PRODUCTS.filter((product) => DRINK_UPSELL_CATEGORIES.includes(product.category)).forEach(
+    (product) => {
+      if (!byCategory.has(product.category)) {
+        byCategory.set(product.category, []);
+      }
+      byCategory.get(product.category).push(buildDrinkUpsellProduct(product));
+    }
+  );
+  return DRINK_UPSELL_CATEGORIES.filter((category) => byCategory.has(category)).map(
+    (category) => ({
+      category,
+      items: byCategory.get(category),
+    })
+  );
+}
 
 function parsePrice(text) {
   const match = text.match(/(\d+)/);
@@ -325,49 +373,84 @@ function requestCheckout() {
   openCheckout();
 }
 
+function appendDrinkUpsellRow(container, drink) {
+  const unavailable = isMenuIdUnavailable(drink.menuId, unavailableIds);
+  const inCart = [...cart.values()].some(
+    (item) => item.menuId === drink.menuId || item.id === drink.id
+  );
+  const displayName = getProductDisplayName(drink.menuId, drink.nameRo, getLang());
+  const displayDetail = getDetailDisplayName(drink.menuId, drink.detail, getLang());
+
+  const row = document.createElement("div");
+  row.className = "drink-upsell__item";
+  if (unavailable) row.classList.add("drink-upsell__item--unavailable");
+
+  const info = document.createElement("div");
+  info.className = "drink-upsell__info";
+  info.innerHTML = `
+    <span class="drink-upsell__name">${escapeHtml(displayName)}</span>
+    <span class="drink-upsell__detail">${escapeHtml(displayDetail)} · ${escapeHtml(drink.priceLabel)}</span>
+  `;
+  row.appendChild(info);
+
+  if (inCart) {
+    const added = document.createElement("span");
+    added.className = "drink-upsell__added";
+    added.textContent = t("cart.inCart");
+    row.appendChild(added);
+  } else {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "drink-upsell__add";
+    btn.textContent = t("cart.addShort");
+    btn.disabled = unavailable;
+    btn.addEventListener("click", () => addDrinkFromUpsell(drink));
+    row.appendChild(btn);
+  }
+
+  container.appendChild(row);
+}
+
+function addDrinkFromUpsell(drink) {
+  const displayName = getProductDisplayName(drink.menuId, drink.nameRo, getLang());
+  const baseProduct = {
+    id: drink.id,
+    name: displayName,
+    nameRo: drink.nameRo,
+    detail: drink.detail,
+    price: drink.price,
+    menuId: drink.menuId,
+    menuCategory: drink.menuCategory,
+  };
+
+  if (drink.productKey && PRODUCT_OPTIONS[drink.productKey]) {
+    openOptionsModal(drink.productKey, baseProduct);
+    return;
+  }
+
+  addToCart(baseProduct);
+  renderDrinkUpsellList();
+}
+
 function renderDrinkUpsellList() {
   if (!els.drinkUpsellList) return;
 
   els.drinkUpsellList.innerHTML = "";
-  DRINK_RECOMMENDATIONS.forEach((drink) => {
-    const unavailable = isMenuIdUnavailable(drink.menuId, unavailableIds);
-    const inCart = [...cart.values()].some(
-      (item) => item.menuId === drink.menuId || item.id === drink.id
-    );
+  getDrinkUpsellGroups().forEach(({ category, items }) => {
+    const group = document.createElement("section");
+    group.className = "drink-upsell__group";
 
-    const row = document.createElement("div");
-    row.className = "drink-upsell__item";
-    if (unavailable) row.classList.add("drink-upsell__item--unavailable");
+    const title = document.createElement("h3");
+    title.className = "drink-upsell__group-title";
+    title.textContent = getCategoryDisplayName(category, getLang());
+    group.appendChild(title);
 
-    const displayName = getProductDisplayName(drink.menuId, drink.name, getLang());
+    const list = document.createElement("div");
+    list.className = "drink-upsell__group-list";
+    items.forEach((drink) => appendDrinkUpsellRow(list, drink));
+    group.appendChild(list);
 
-    const info = document.createElement("div");
-    info.className = "drink-upsell__info";
-    info.innerHTML = `
-      <span class="drink-upsell__name">${escapeHtml(displayName)}</span>
-      <span class="drink-upsell__detail">${escapeHtml(drink.detail)} · ${drink.price} lei</span>
-    `;
-    row.appendChild(info);
-
-    if (inCart) {
-      const added = document.createElement("span");
-      added.className = "drink-upsell__added";
-      added.textContent = t("cart.inCart");
-      row.appendChild(added);
-    } else {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "drink-upsell__add";
-      btn.textContent = t("cart.addShort");
-      btn.disabled = unavailable;
-      btn.addEventListener("click", () => {
-        addToCart({ ...drink, name: displayName, nameRo: drink.name });
-        renderDrinkUpsellList();
-      });
-      row.appendChild(btn);
-    }
-
-    els.drinkUpsellList.appendChild(row);
+    els.drinkUpsellList.appendChild(group);
   });
 }
 
@@ -511,6 +594,14 @@ function closeOptionsModal() {
   pendingProduct = null;
   editingCartId = null;
   els.optionsConfirm.textContent = t("options.add");
+
+  const reopen = reopenDrinkUpsellAfterOptions;
+  reopenDrinkUpsellAfterOptions = false;
+  if (reopen) {
+    openDrinkUpsell();
+  } else if (els.drinkUpsellModal?.open) {
+    renderDrinkUpsellList();
+  }
 }
 
 function refreshCartDisplayNames() {
@@ -790,6 +881,11 @@ function openOptionsModal(productKey, baseProduct) {
   const config = PRODUCT_OPTIONS[productKey];
   if (!config) return;
 
+  if (els.drinkUpsellModal?.open) {
+    reopenDrinkUpsellAfterOptions = true;
+    closeDrinkUpsell();
+  }
+
   editingCartId = null;
   pendingProduct = { ...baseProduct, productKey };
   els.optionsTitle.textContent = baseProduct.name;
@@ -1068,6 +1164,9 @@ function onMenuPricesUpdated(prices, updatedAt = Date.now(), meta = {}) {
   syncGrillPrices();
   applyMenuPricesToDocument(menuPrices);
   applyMenuAvailability();
+  if (els.drinkUpsellModal?.open) {
+    renderDrinkUpsellList();
+  }
 }
 
 function getMenuItemLivePrice(item, menuId, priceEl) {
@@ -1239,6 +1338,7 @@ async function submitOrder(event) {
 }
 
 async function init() {
+  closeDrinkUpsell();
   initTableFromQr();
 
   try {
@@ -1261,6 +1361,9 @@ async function init() {
     refreshCartDisplayNames();
     renderCart();
     applyMenuAvailability();
+    if (els.drinkUpsellModal?.open) {
+      renderDrinkUpsellList();
+    }
   });
 
   subscribeMenuPrices((prices, updatedAt, meta) => {
