@@ -23,7 +23,7 @@ import {
   applyMenuLanguage,
   initLangSwitcher,
   onLangChange,
-} from "./menu-i18n.js?v=4";
+} from "./menu-i18n.js?v=5";
 import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=8";
 import {
   subscribeMenuPrices,

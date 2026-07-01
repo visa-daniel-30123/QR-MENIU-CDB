@@ -58,6 +58,8 @@ const UI = {
     "cart.addLabel": "Adaugă {name} în coș",
     "cart.unavailableLabel": "{name} — indisponibil",
     "cart.inCart": "✓ În coș",
+  },
+  en: {
     "header.subtitle": "Terrace & restaurant",
     "header.location": "Porumbacu de Sus · tourist area",
     "nav.all": "All",
