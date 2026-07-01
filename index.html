@@ -17,30 +17,34 @@
       <img src="LOGO CDB.jpg" alt="Casuta dintre brazi" class="header__logo" width="120" height="120">
       <div class="header__text">
         <h1 class="header__title">Casuta dintre brazi</h1>
-        <p class="header__subtitle">Terasă &amp; restaurant</p>
+        <p class="header__subtitle" data-i18n="header.subtitle">Terasă &amp; restaurant</p>
         <p class="header__location">
-          <a href="https://maps.app.goo.gl/9gvDvL2cosEKZXov8?g_st=iw" target="_blank" rel="noopener noreferrer">Porumbacu de Sus · zonă turistică</a>
+          <a href="https://maps.app.goo.gl/9gvDvL2cosEKZXov8?g_st=iw" target="_blank" rel="noopener noreferrer" data-i18n="header.location">Porumbacu de Sus · zonă turistică</a>
         </p>
+        <div class="lang-switch" id="lang-switch" role="group" data-i18n-aria="lang.label" aria-label="Limba">
+          <button type="button" class="lang-switch__btn lang-switch__btn--active" data-lang="ro">RO</button>
+          <button type="button" class="lang-switch__btn" data-lang="en">EN</button>
+        </div>
         <p class="header__table" id="header-table-badge" hidden></p>
       </div>
     </div>
   </header>
 
   <nav class="nav" aria-label="Categorii meniu">
-    <button class="nav__btn nav__btn--active" data-category="all">Toate</button>
-    <button class="nav__btn" data-category="mancare">Mâncare</button>
-    <button class="nav__btn" data-category="dulciuri">Dulciuri</button>
-    <button class="nav__btn" data-category="bauturi">Băuturi</button>
+    <button class="nav__btn nav__btn--active" data-category="all" data-i18n="nav.all">Toate</button>
+    <button class="nav__btn" data-category="mancare" data-i18n="nav.food">Mâncare</button>
+    <button class="nav__btn" data-category="dulciuri" data-i18n="nav.sweets">Dulciuri</button>
+    <button class="nav__btn" data-category="bauturi" data-i18n="nav.drinks">Băuturi</button>
   </nav>
 
   <aside class="cart-top" id="cart-top" aria-label="Coșul tău">
     <div class="cart-top__row">
       <button type="button" class="cart-top__toggle" id="cart-toggle" aria-expanded="false">
-        <span class="cart-top__label">🛒 Coș</span>
-        <span class="cart-top__summary" id="cart-summary">0 produse · 0 lei</span>
+        <span class="cart-top__label" data-i18n="cart.label">🛒 Coș</span>
+        <span class="cart-top__summary" id="cart-summary" data-i18n="cart.empty">0 produse · 0 lei</span>
         <span class="cart-top__chevron" aria-hidden="true">▼</span>
       </button>
-      <button type="button" class="cart-top__checkout" id="cart-checkout-open" disabled>
+      <button type="button" class="cart-top__checkout" id="cart-checkout-open" disabled data-i18n="cart.checkout">
         Finalizează
       </button>
     </div>
@@ -53,7 +57,7 @@
     <section class="category" data-category="mancare">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">🍽️</span>
-        <h2 class="category__title">Preparate calde</h2>
+        <h2 class="category__title" data-i18n-cat="preparate-calde">Preparate calde</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item" data-product="hot-dog">
@@ -112,7 +116,7 @@
     <section class="category" data-category="mancare">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">🔥</span>
-        <h2 class="category__title">Preparate la grătar</h2>
+        <h2 class="category__title" data-i18n-cat="preparate-la-gratar">Preparate la grătar</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item" data-product="mici">
@@ -171,7 +175,7 @@
     <section class="category" data-category="dulciuri">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">🍰</span>
-        <h2 class="category__title">Dulciuri</h2>
+        <h2 class="category__title" data-i18n-cat="dulciuri">Dulciuri</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item">
@@ -301,7 +305,7 @@
     <section class="category" data-category="bauturi">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">☕</span>
-        <h2 class="category__title">Băuturi calde</h2>
+        <h2 class="category__title" data-i18n-cat="bauturi-calde">Băuturi calde</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item">
@@ -377,7 +381,7 @@
     <section class="category" data-category="bauturi">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">🥤</span>
-        <h2 class="category__title">Sucuri</h2>
+        <h2 class="category__title" data-i18n-cat="sucuri">Sucuri</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item">
@@ -476,7 +480,7 @@
     <section class="category" data-category="bauturi">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">⚡</span>
-        <h2 class="category__title">Energizante</h2>
+        <h2 class="category__title" data-i18n-cat="energizante">Energizante</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item">
@@ -505,7 +509,7 @@
     <section class="category" data-category="bauturi">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">💧</span>
-        <h2 class="category__title">Apă</h2>
+        <h2 class="category__title" data-i18n-cat="apa">Apă</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item">
@@ -554,7 +558,7 @@
     <section class="category" data-category="bauturi">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">🍺</span>
-        <h2 class="category__title">Bere</h2>
+        <h2 class="category__title" data-i18n-cat="bere">Bere</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item">
@@ -613,7 +617,7 @@
     <section class="category" data-category="bauturi">
       <div class="category__header">
         <span class="category__icon" aria-hidden="true">🍻</span>
-        <h2 class="category__title">Bere fără alcool</h2>
+        <h2 class="category__title" data-i18n-cat="bere-fara-alcool">Bere fără alcool</h2>
       </div>
       <ul class="menu-list">
         <li class="menu-item">
@@ -663,23 +667,23 @@
   <footer class="footer">
     <img src="LOGO CDB.jpg" alt="" class="footer__logo" width="48" height="48" aria-hidden="true">
     <p class="footer__text">Casuta dintre brazi</p>
-    <p class="footer__note">Prețurile sunt exprimate în lei (RON)</p>
+    <p class="footer__note" data-i18n="footer.note">Prețurile sunt exprimate în lei (RON)</p>
   </footer>
 
   <div class="options-backdrop" id="options-backdrop" hidden></div>
 
   <dialog class="options-modal" id="options-modal" aria-labelledby="options-title">
     <header class="options-modal__header">
-      <h2 class="options-modal__title" id="options-title">Personalizează</h2>
-      <button type="button" class="options-modal__close" id="options-close" aria-label="Închide">×</button>
+      <h2 class="options-modal__title" id="options-title" data-i18n="options.title">Personalizează</h2>
+      <button type="button" class="options-modal__close" id="options-close" data-i18n-aria="options.close" aria-label="Închide">×</button>
     </header>
     <div class="options-modal__body" id="options-body"></div>
     <p class="options-modal__error" id="options-error" hidden></p>
     <footer class="options-modal__footer">
       <span class="options-modal__price" id="options-price"></span>
       <div class="options-modal__actions">
-        <button type="button" class="options-modal__btn options-modal__btn--ghost" id="options-cancel">Anulează</button>
-        <button type="button" class="options-modal__btn options-modal__btn--primary" id="options-confirm">Adaugă în coș</button>
+        <button type="button" class="options-modal__btn options-modal__btn--ghost" id="options-cancel" data-i18n="options.cancel">Anulează</button>
+        <button type="button" class="options-modal__btn options-modal__btn--primary" id="options-confirm" data-i18n="options.add">Adaugă în coș</button>
       </div>
     </footer>
   </dialog>
@@ -688,15 +692,15 @@
 
   <dialog class="drink-upsell-modal" id="drink-upsell-modal" aria-labelledby="drink-upsell-title">
     <header class="drink-upsell-modal__header">
-      <h2 class="drink-upsell-modal__title" id="drink-upsell-title">Ceva de băut?</h2>
-      <button type="button" class="drink-upsell-modal__close" id="drink-upsell-close" aria-label="Închide">×</button>
+      <h2 class="drink-upsell-modal__title" id="drink-upsell-title" data-i18n="drink.title">Ceva de băut?</h2>
+      <button type="button" class="drink-upsell-modal__close" id="drink-upsell-close" data-i18n-aria="options.close" aria-label="Închide">×</button>
     </header>
     <div class="drink-upsell-modal__body">
-      <p class="drink-upsell-modal__hint">Ai comandat mâncare — poate vrei și ceva de băut?</p>
+      <p class="drink-upsell-modal__hint" data-i18n="drink.hint">Ai comandat mâncare — poate vrei și ceva de băut?</p>
       <div class="drink-upsell__list" id="drink-upsell-list"></div>
     </div>
     <footer class="drink-upsell-modal__footer">
-      <button type="button" class="drink-upsell-modal__btn drink-upsell-modal__btn--primary" id="drink-upsell-continue">Continuă la comandă</button>
+      <button type="button" class="drink-upsell-modal__btn drink-upsell-modal__btn--primary" id="drink-upsell-continue" data-i18n="drink.continue">Continuă la comandă</button>
     </footer>
   </dialog>
 
@@ -704,31 +708,31 @@
 
   <dialog class="checkout-modal" id="checkout-modal" aria-labelledby="checkout-title">
     <header class="checkout-modal__header">
-      <h2 class="checkout-modal__title" id="checkout-title">Finalizează comanda</h2>
-      <button type="button" class="checkout-modal__close" id="checkout-close" aria-label="Închide">×</button>
+      <h2 class="checkout-modal__title" id="checkout-title" data-i18n="checkout.title">Finalizează comanda</h2>
+      <button type="button" class="checkout-modal__close" id="checkout-close" data-i18n-aria="options.close" aria-label="Închide">×</button>
     </header>
     <div class="checkout-modal__body">
-      <p class="checkout-modal__total">Total: <strong id="cart-total">0 lei</strong></p>
-      <p class="checkout-modal__success" id="cart-success" hidden>
+      <p class="checkout-modal__total"><span data-i18n="checkout.total">Total:</span> <strong id="cart-total">0 lei</strong></p>
+      <p class="checkout-modal__success" id="cart-success" hidden data-i18n="checkout.success">
         Comanda a fost trimisă! O pregătim imediat.
       </p>
       <p class="checkout-modal__error" id="cart-error" hidden></p>
       <p class="checkout-modal__table" id="table-badge" hidden></p>
       <form class="cart-form" id="cart-form">
         <label class="cart-form__label" id="checkout-table-label">
-          Nr. masă
-          <input type="text" name="table" class="cart-form__input" inputmode="numeric" placeholder="Ex: 5">
+          <span data-i18n="checkout.table">Nr. masă</span>
+          <input type="text" name="table" class="cart-form__input" inputmode="numeric" data-i18n-placeholder="checkout.tablePh" placeholder="Ex: 5">
         </label>
         <label class="cart-form__label">
-          Observații (opțional)
-          <textarea name="notes" class="cart-form__input cart-form__textarea" rows="2" placeholder="Ex: fără muștar"></textarea>
+          <span data-i18n="checkout.notes">Observații (opțional)</span>
+          <textarea name="notes" class="cart-form__input cart-form__textarea" rows="2" data-i18n-placeholder="checkout.notesPh" placeholder="Ex: fără muștar"></textarea>
         </label>
-        <button type="submit" class="cart-form__submit" id="cart-submit">Trimite comanda</button>
+        <button type="submit" class="cart-form__submit" id="cart-submit" data-i18n="checkout.submit">Trimite comanda</button>
       </form>
     </div>
   </dialog>
 
   <script src="script.js"></script>
-  <script type="module" src="cart.js?v=12"></script>
+  <script type="module" src="cart.js?v=13"></script>
 </body>
 </html>

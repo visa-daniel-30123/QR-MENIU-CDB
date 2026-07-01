@@ -5,6 +5,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db, isFirebaseConfigured } from "./firebase-app.js";
 import { getMenuId, isMenuIdUnavailable, CARTOFI_MENU_ID, BREAD_MENU_ID, formatMenuPriceLabel } from "./menu-catalog.js?v=8";
+import {
+  t,
+  getLang,
+  getProductDisplayName,
+  getRomanianProductName,
+  applyMenuLanguage,
+  initLangSwitcher,
+  onLangChange,
+} from "./menu-i18n.js?v=1";
 import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=8";
 import {
   subscribeMenuPrices,
@@ -204,10 +213,15 @@ function finalizeCartProduct(product) {
   }
 
   const existing = cart.get(product.id);
+  const entry = {
+    ...product,
+    nameRo: product.nameRo || getRomanianProductName(product.menuId, product.name),
+    qty,
+  };
   if (existing) {
     existing.qty += qty;
   } else {
-    cart.set(product.id, { ...product, qty });
+    cart.set(product.id, entry);
   }
 
   renderCart();
@@ -268,11 +282,11 @@ function applyTableUi() {
     }
     if (tableLabel) tableLabel.hidden = true;
     if (tableBadge) {
-      tableBadge.textContent = `Comandă pentru masa ${qrTableNumber}`;
+      tableBadge.textContent = t("checkout.tableBadge", { n: qrTableNumber });
       tableBadge.hidden = false;
     }
     if (headerBadge) {
-      headerBadge.textContent = `Masă ${qrTableNumber}`;
+      headerBadge.textContent = t("checkout.headerTable", { n: qrTableNumber });
       headerBadge.hidden = false;
     }
     return;
@@ -325,10 +339,12 @@ function renderDrinkUpsellList() {
     row.className = "drink-upsell__item";
     if (unavailable) row.classList.add("drink-upsell__item--unavailable");
 
+    const displayName = getProductDisplayName(drink.menuId, drink.name, getLang());
+
     const info = document.createElement("div");
     info.className = "drink-upsell__info";
     info.innerHTML = `
-      <span class="drink-upsell__name">${escapeHtml(drink.name)}</span>
+      <span class="drink-upsell__name">${escapeHtml(displayName)}</span>
       <span class="drink-upsell__detail">${escapeHtml(drink.detail)} · ${drink.price} lei</span>
     `;
     row.appendChild(info);
@@ -336,16 +352,16 @@ function renderDrinkUpsellList() {
     if (inCart) {
       const added = document.createElement("span");
       added.className = "drink-upsell__added";
-      added.textContent = "✓ În coș";
+      added.textContent = t("cart.inCart");
       row.appendChild(added);
     } else {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "drink-upsell__add";
-      btn.textContent = "+ Adaugă";
+      btn.textContent = t("cart.addShort");
       btn.disabled = unavailable;
       btn.addEventListener("click", () => {
-        addToCart({ ...drink });
+        addToCart({ ...drink, name: displayName, nameRo: drink.name });
         renderDrinkUpsellList();
       });
       row.appendChild(btn);
@@ -386,8 +402,7 @@ function openCheckout() {
   els.success.hidden = true;
 
   if (!isFirebaseConfigured()) {
-    els.error.textContent =
-      "Comenzile online nu sunt disponibile momentan. Contactează ospătarul.";
+    els.error.textContent = t("error.firebase");
     els.error.hidden = false;
     els.submit.disabled = true;
   } else {
@@ -423,29 +438,33 @@ function renderCart() {
 
   if (!hasItems) {
     els.total.textContent = "0 lei";
-    els.cartSummary.textContent = "0 produse · 0 lei";
+    els.cartSummary.textContent = t("cart.empty");
     setCartExpanded(false);
     return;
   }
 
-  const label = count === 1 ? "1 produs" : `${count} produse`;
+  const label = count === 1 ? t("cart.one") : `${count} ${t("cart.many")}`;
   els.cartSummary.textContent = `${label} · ${total} lei`;
   els.total.textContent = `${total} lei`;
 
   items.forEach((item) => {
     const row = document.createElement("div");
     row.className = "cart-item";
-    const canEdit = item.customizable && (item.productKey || PRODUCT_KEY_BY_NAME[item.name]);
+    const canEdit =
+      item.customizable && (item.productKey || PRODUCT_KEY_BY_NAME[item.nameRo || item.name]);
+    const displayName = item.menuId
+      ? getProductDisplayName(item.menuId, item.nameRo || item.name, getLang())
+      : item.name;
     row.innerHTML = `
       <div class="cart-item__info">
-        <span class="cart-item__name">${escapeHtml(item.name)}</span>
+        <span class="cart-item__name">${escapeHtml(displayName)}</span>
         ${item.detail ? `<span class="cart-item__detail">${escapeHtml(item.detail)}</span>` : ""}
-        ${canEdit ? `<button type="button" class="cart-item__edit" data-action="edit" data-id="${item.id}">Editează</button>` : ""}
+        ${canEdit ? `<button type="button" class="cart-item__edit" data-action="edit" data-id="${item.id}">${escapeHtml(t("cart.edit"))}</button>` : ""}
       </div>
       <div class="cart-item__controls">
-        <button type="button" class="cart-item__qty-btn" data-action="dec" data-id="${item.id}" aria-label="Mai puțin">−</button>
+        <button type="button" class="cart-item__qty-btn" data-action="dec" data-id="${item.id}" aria-label="${escapeHtml(t("cart.less"))}">−</button>
         <span class="cart-item__qty">${item.qty}</span>
-        <button type="button" class="cart-item__qty-btn" data-action="inc" data-id="${item.id}" aria-label="Mai mult">+</button>
+        <button type="button" class="cart-item__qty-btn" data-action="inc" data-id="${item.id}" aria-label="${escapeHtml(t("cart.more"))}">+</button>
       </div>
       <span class="cart-item__price">${lineTotal(item)} lei</span>
     `;
@@ -453,8 +472,7 @@ function renderCart() {
   });
 
   if (!isFirebaseConfigured()) {
-    els.error.textContent =
-      "Comenzile online nu sunt disponibile momentan. Contactează ospătarul.";
+    els.error.textContent = t("error.firebase");
     els.error.hidden = false;
     els.submit.disabled = true;
   } else {
@@ -492,7 +510,16 @@ function closeOptionsModal() {
   els.optionsError.hidden = true;
   pendingProduct = null;
   editingCartId = null;
-  els.optionsConfirm.textContent = "Adaugă în coș";
+  els.optionsConfirm.textContent = t("options.add");
+}
+
+function refreshCartDisplayNames() {
+  cart.forEach((item) => {
+    if (!item.menuId) return;
+    const nameRo = item.nameRo || getRomanianProductName(item.menuId, item.name);
+    item.nameRo = nameRo;
+    item.name = getProductDisplayName(item.menuId, nameRo, getLang());
+  });
 }
 
 function bindSauceLimit(selector) {
@@ -501,7 +528,7 @@ function bindSauceLimit(selector) {
       const checked = els.optionsBody.querySelectorAll(`${selector}:checked`);
       if (checked.length > MAX_SAUCES) {
         checkbox.checked = false;
-        els.optionsError.textContent = `Poți alege maximum ${MAX_SAUCES} sosuri.`;
+        els.optionsError.textContent = t("options.sauces.max", { n: MAX_SAUCES });
         els.optionsError.hidden = false;
       } else {
         els.optionsError.hidden = true;
@@ -521,7 +548,7 @@ function renderSauceOptions() {
   const selectedSauces = getInitialSauces(init);
 
   els.optionsBody.innerHTML = `
-    <p class="options-modal__hint">Alege până la ${MAX_SAUCES} sosuri:</p>
+    <p class="options-modal__hint">${t("options.sauces.pick", { n: MAX_SAUCES })}</p>
     <fieldset class="options-group">
       <legend class="visually-hidden">Sosuri</legend>
       ${SAUCES.map(
@@ -534,7 +561,7 @@ function renderSauceOptions() {
     </fieldset>
     <label class="options-check">
       <input type="checkbox" id="menu-bread" ${init.withBread ? "checked" : ""}>
-      <span>Vrei și pâine? <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
+      <span>${t("options.bread")} <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
     </label>
   `;
 
@@ -554,7 +581,7 @@ function renderSaucesOnlyOptions() {
   const selectedSauces = getInitialSauces(init);
 
   els.optionsBody.innerHTML = `
-    <p class="options-modal__hint">Alege până la ${MAX_SAUCES} sosuri:</p>
+    <p class="options-modal__hint">${t("options.sauces.pick", { n: MAX_SAUCES })}</p>
     <fieldset class="options-group">
       <legend class="visually-hidden">Sosuri</legend>
       ${SAUCES.map(
@@ -575,10 +602,10 @@ function renderMilkOptions() {
   const init = pendingProduct.editOptions || {};
 
   els.optionsBody.innerHTML = `
-    <p class="options-modal__hint">Dorești lapte?</p>
+    <p class="options-modal__hint">${t("options.milk")}</p>
     <label class="options-check">
       <input type="checkbox" id="espresso-milk" ${init.withMilk ? "checked" : ""}>
-      <span>Cu lapte</span>
+      <span>${t("options.milk.yes")}</span>
     </label>
   `;
 
@@ -589,7 +616,7 @@ function renderGrillOptions(config) {
   const init = pendingProduct.editOptions || {};
 
   els.optionsBody.innerHTML = `
-    <p class="options-modal__hint">Câte bucăți dorești?</p>
+    <p class="options-modal__hint">${t("options.pieces")}</p>
     <div class="options-stepper">
       <button type="button" class="options-stepper__btn" data-step="-1" aria-label="Mai puține">−</button>
       <input type="number" class="options-stepper__input" id="grill-pieces" value="${init.pieces || 1}" min="1" max="30" inputmode="numeric">
@@ -598,13 +625,13 @@ function renderGrillOptions(config) {
     </div>
     <label class="options-check">
       <input type="checkbox" id="grill-fries" ${init.withFries ? "checked" : ""}>
-      <span>Vrei și cartofi prăjiți? <strong>+${FRIES_PRICE} lei</strong></span>
+      <span>${t("options.fries")} <strong>+${FRIES_PRICE} lei</strong></span>
     </label>
     <label class="options-check">
       <input type="checkbox" id="grill-bread" ${init.withBread ? "checked" : ""}>
-      <span>Vrei și pâine? <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
+      <span>${t("options.bread")} <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
     </label>
-    <p class="options-modal__hint">Alege până la ${MAX_SAUCES} sosuri (opțional):</p>
+    <p class="options-modal__hint">${t("options.sauces.pickOptional", { n: MAX_SAUCES })}</p>
     <fieldset class="options-group">
       <legend class="visually-hidden">Sosuri</legend>
       ${SAUCES.map(
@@ -699,7 +726,7 @@ function renderPlateOptions() {
   const init = pendingProduct.editOptions || {};
 
   els.optionsBody.innerHTML = `
-    <p class="options-modal__hint">Alege ce pui pe farfurie:</p>
+    <p class="options-modal__hint">${t("options.plate.pick")}</p>
     ${renderPlateRow("mici", init)}
     ${renderPlateRow("carnaciori", init)}
     ${renderPlateRow("ceafa", init)}
@@ -709,9 +736,9 @@ function renderPlateOptions() {
     </label>
     <label class="options-check">
       <input type="checkbox" id="plate-bread" ${init.withBread ? "checked" : ""}>
-      <span>Pâine <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
+      <span>${t("options.plate.bread")} <strong>${addonPriceLabel(BREAD_PRICE)}</strong></span>
     </label>
-    <p class="options-modal__hint">Alege până la ${MAX_SAUCES} sosuri (opțional):</p>
+    <p class="options-modal__hint">${t("options.sauces.pickOptional", { n: MAX_SAUCES })}</p>
     <fieldset class="options-group">
       <legend class="visually-hidden">Sosuri</legend>
       ${SAUCES.map(
@@ -767,7 +794,7 @@ function openOptionsModal(productKey, baseProduct) {
   pendingProduct = { ...baseProduct, productKey };
   els.optionsTitle.textContent = baseProduct.name;
   els.optionsError.hidden = true;
-  els.optionsConfirm.textContent = "Adaugă în coș";
+  els.optionsConfirm.textContent = t("options.add");
 
   if (config.type === "sauce") {
     renderSauceOptions();
@@ -786,13 +813,15 @@ function openOptionsModal(productKey, baseProduct) {
 }
 
 function openEditModal(item) {
-  const productKey = item.productKey || PRODUCT_KEY_BY_NAME[item.name];
+  const nameRo = item.nameRo || item.name;
+  const productKey = item.productKey || PRODUCT_KEY_BY_NAME[nameRo];
   const config = PRODUCT_OPTIONS[productKey];
   if (!config) return;
 
   editingCartId = item.id;
   pendingProduct = {
     name: item.name,
+    nameRo,
     price: item.price,
     detail: item.detail,
     productKey,
@@ -802,7 +831,7 @@ function openEditModal(item) {
   };
   els.optionsTitle.textContent = item.name;
   els.optionsError.hidden = true;
-  els.optionsConfirm.textContent = "Salvează";
+  els.optionsConfirm.textContent = t("options.save");
 
   if (config.type === "sauce") {
     renderSauceOptions();
@@ -831,13 +860,13 @@ function confirmOptions() {
     );
 
     if (sauces.length === 0) {
-      els.optionsError.textContent = "Alege cel puțin un sos.";
+      els.optionsError.textContent = t("options.sauces.pickOne");
       els.optionsError.hidden = false;
       return;
     }
 
     if (sauces.length > MAX_SAUCES) {
-      els.optionsError.textContent = `Poți alege maximum ${MAX_SAUCES} sosuri.`;
+      els.optionsError.textContent = t("options.sauces.max", { n: MAX_SAUCES });
       els.optionsError.hidden = false;
       return;
     }
@@ -856,10 +885,12 @@ function confirmOptions() {
     finalizeCartProduct({
       id,
       name: pendingProduct.name,
+      nameRo: pendingProduct.nameRo || pendingProduct.name,
       detail,
       price: pendingProduct.price,
       linePrice,
       productKey: pendingProduct.productKey,
+      menuId: pendingProduct.menuId,
       options,
       customizable: true,
       menuCategory: pendingProduct.menuCategory,
@@ -870,13 +901,13 @@ function confirmOptions() {
     );
 
     if (sauces.length === 0) {
-      els.optionsError.textContent = "Alege cel puțin un sos.";
+      els.optionsError.textContent = t("options.sauces.pickOne");
       els.optionsError.hidden = false;
       return;
     }
 
     if (sauces.length > MAX_SAUCES) {
-      els.optionsError.textContent = `Poți alege maximum ${MAX_SAUCES} sosuri.`;
+      els.optionsError.textContent = t("options.sauces.max", { n: MAX_SAUCES });
       els.optionsError.hidden = false;
       return;
     }
@@ -888,10 +919,12 @@ function confirmOptions() {
     finalizeCartProduct({
       id,
       name: pendingProduct.name,
+      nameRo: pendingProduct.nameRo || pendingProduct.name,
       detail,
       price: pendingProduct.price,
       linePrice: pendingProduct.price,
       productKey: pendingProduct.productKey,
+      menuId: pendingProduct.menuId,
       options,
       customizable: true,
       menuCategory: pendingProduct.menuCategory,
@@ -908,6 +941,7 @@ function confirmOptions() {
     finalizeCartProduct({
       id,
       name: pendingProduct.name,
+      nameRo: pendingProduct.nameRo || pendingProduct.name,
       detail,
       price: pendingProduct.price,
       linePrice: pendingProduct.price,
@@ -926,13 +960,13 @@ function confirmOptions() {
     );
 
     if (quantities.mici + quantities.carnaciori + quantities.ceafa === 0) {
-      els.optionsError.textContent = "Alege cel puțin un preparat pe farfurie.";
+      els.optionsError.textContent = t("options.plate.min");
       els.optionsError.hidden = false;
       return;
     }
 
     if (sauces.length > MAX_SAUCES) {
-      els.optionsError.textContent = `Poți alege maximum ${MAX_SAUCES} sosuri.`;
+      els.optionsError.textContent = t("options.sauces.max", { n: MAX_SAUCES });
       els.optionsError.hidden = false;
       return;
     }
@@ -947,10 +981,12 @@ function confirmOptions() {
     finalizeCartProduct({
       id,
       name: pendingProduct.name,
+      nameRo: pendingProduct.nameRo || pendingProduct.name,
       detail,
       price: pendingProduct.price,
       linePrice,
       productKey: pendingProduct.productKey,
+      menuId: pendingProduct.menuId,
       options,
       customizable: true,
       menuCategory: pendingProduct.menuCategory,
@@ -964,7 +1000,7 @@ function confirmOptions() {
     );
 
     if (sauces.length > MAX_SAUCES) {
-      els.optionsError.textContent = `Poți alege maximum ${MAX_SAUCES} sosuri.`;
+      els.optionsError.textContent = t("options.sauces.max", { n: MAX_SAUCES });
       els.optionsError.hidden = false;
       return;
     }
@@ -988,10 +1024,12 @@ function confirmOptions() {
     finalizeCartProduct({
       id,
       name: pendingProduct.name,
+      nameRo: pendingProduct.nameRo || pendingProduct.name,
       detail,
       price: config.unitPrice,
       linePrice,
       productKey: pendingProduct.productKey,
+      menuId: pendingProduct.menuId,
       options,
       customizable: true,
       menuCategory: pendingProduct.menuCategory,
@@ -1048,20 +1086,21 @@ function initMenuButtons() {
 
     if (!nameEl || !priceEl) return;
 
-    const name = nameEl.textContent.trim();
-    const detail = detailEl ? detailEl.textContent.trim() : "";
+    const nameRo = nameEl.dataset.nameRo || nameEl.textContent.trim();
+    const detailRo = detailEl ? detailEl.dataset.detailRo || detailEl.textContent.trim() : "";
     const productKey =
-      item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[name] || "";
-    const menuId = getMenuId(productKey, name, detail);
-    const id = slugify(`${name}-${detail}`);
+      item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[nameRo] || "";
+    const menuId = getMenuId(productKey, nameRo, detailRo);
+    const id = slugify(`${nameRo}-${detailRo}`);
     const menuCategory = item.closest(".category")?.dataset.category || "";
+    const displayName = getProductDisplayName(menuId, nameRo, getLang());
 
     item.dataset.menuId = menuId;
 
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "menu-item__add";
-    btn.setAttribute("aria-label", `Adaugă ${name} în coș`);
+    btn.setAttribute("aria-label", t("cart.addLabel", { name: displayName }));
     btn.textContent = "+";
     btn.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -1070,9 +1109,26 @@ function initMenuButtons() {
       const price = getMenuItemLivePrice(item, menuId, priceEl);
 
       if (productKey && PRODUCT_OPTIONS[productKey]) {
-        openOptionsModal(productKey, { id, name, detail, price, productKey, menuId, menuCategory });
+        openOptionsModal(productKey, {
+          id,
+          name: displayName,
+          nameRo,
+          detail: detailRo,
+          price,
+          productKey,
+          menuId,
+          menuCategory,
+        });
       } else {
-        addToCart({ id, name, detail, price, menuId, menuCategory });
+        addToCart({
+          id,
+          name: displayName,
+          nameRo,
+          detail: detailRo,
+          price,
+          menuId,
+          menuCategory,
+        });
       }
     });
 
@@ -1088,13 +1144,16 @@ function applyMenuAvailability() {
     const priceEl = item.querySelector(".menu-item__price");
     if (!nameEl || !priceEl) return;
 
-    const name = nameEl.textContent.trim();
-    const detail = item.querySelector(".menu-item__detail")?.textContent.trim() || "";
+    const nameRo = nameEl.dataset.nameRo || nameEl.textContent.trim();
+    const detailRo = item.querySelector(".menu-item__detail")?.dataset.detailRo
+      || item.querySelector(".menu-item__detail")?.textContent.trim()
+      || "";
     const productKey =
-      item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[name] || "";
-    const menuId = getMenuId(productKey, name, detail);
+      item.getAttribute("data-product") || PRODUCT_KEY_BY_NAME[nameRo] || "";
+    const menuId = getMenuId(productKey, nameRo, detailRo);
     item.dataset.menuId = menuId;
 
+    const displayName = getProductDisplayName(menuId, nameRo, getLang());
     const unavailable = isMenuIdUnavailable(menuId, unavailableIds);
     const btn = item.querySelector(".menu-item__add");
 
@@ -1104,7 +1163,9 @@ function applyMenuAvailability() {
       btn.disabled = unavailable;
       btn.setAttribute(
         "aria-label",
-        unavailable ? `${name} — indisponibil` : `Adaugă ${name} în coș`
+        unavailable
+          ? t("cart.unavailableLabel", { name: displayName })
+          : t("cart.addLabel", { name: displayName })
       );
     }
 
@@ -1113,7 +1174,7 @@ function applyMenuAvailability() {
       if (!badge) {
         badge = document.createElement("span");
         badge.className = "menu-item__badge";
-        badge.textContent = "Indisponibil";
+        badge.textContent = t("badge.unavailable");
         item.querySelector(".menu-item__content")?.appendChild(badge);
       }
     } else if (badge) {
@@ -1127,7 +1188,7 @@ async function submitOrder(event) {
   if (cart.size === 0) return;
 
   if (!isFirebaseConfigured()) {
-    els.error.textContent = "Trimiterea comenzilor necesită configurarea Firebase.";
+    els.error.textContent = t("error.firebaseConfig");
     els.error.hidden = false;
     return;
   }
@@ -1146,7 +1207,7 @@ async function submitOrder(event) {
     notes,
     items: [...cart.values()].map((item) => ({
       id: item.id,
-      name: item.name,
+      name: item.nameRo || getRomanianProductName(item.menuId, item.name),
       detail: item.detail || "",
       price: item.linePrice != null ? item.linePrice : item.price,
       qty: item.qty,
@@ -1170,7 +1231,7 @@ async function submitOrder(event) {
     }, 2300);
   } catch (err) {
     console.error(err);
-    els.error.textContent = "Comanda nu a putut fi trimisă. Verifică conexiunea.";
+    els.error.textContent = t("error.submit");
     els.error.hidden = false;
   } finally {
     els.submit.disabled = !isFirebaseConfigured();
@@ -1192,6 +1253,16 @@ async function init() {
   document.body.classList.remove("menu-prices-pending");
 
   initMenuButtons();
+  applyMenuLanguage(getLang());
+  initLangSwitcher();
+  onLangChange(() => {
+    applyMenuLanguage(getLang());
+    applyTableUi();
+    refreshCartDisplayNames();
+    renderCart();
+    applyMenuAvailability();
+  });
+
   subscribeMenuPrices((prices, updatedAt, meta) => {
     onMenuPricesUpdated(prices, updatedAt, meta);
   });

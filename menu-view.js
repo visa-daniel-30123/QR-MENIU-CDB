@@ -1,3 +1,10 @@
+import {
+  applyMenuLanguage,
+  initLangSwitcher,
+  onLangChange,
+  t,
+  getLang,
+} from "./menu-i18n.js?v=1";
 import { getMenuId, isMenuIdUnavailable } from "./menu-catalog.js?v=8";
 import { subscribeMenuAvailability, refreshMenuAvailability } from "./menu-availability.js?v=8";
 import {
@@ -45,7 +52,7 @@ function applyMenuAvailability() {
       if (!badge) {
         badge = document.createElement("span");
         badge.className = "menu-item__badge";
-        badge.textContent = "Indisponibil";
+        badge.textContent = t("badge.unavailable");
         item.querySelector(".menu-item__content")?.appendChild(badge);
       }
     } else if (badge) {
@@ -74,6 +81,14 @@ async function init() {
 
   menuPricesReady = true;
   document.body.classList.remove("menu-prices-pending");
+
+  applyMenuAvailability();
+  applyMenuLanguage(getLang());
+  initLangSwitcher();
+  onLangChange(() => {
+    applyMenuLanguage(getLang());
+    applyMenuAvailability();
+  });
 
   subscribeMenuPrices((prices, updatedAt, meta) => {
     onMenuPricesUpdated(prices, updatedAt, meta);
